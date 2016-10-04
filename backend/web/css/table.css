@@ -1,0 +1,11 @@
+/* тут переоределим стиль таблицы */
+.table-bordered td, th{
+    padding: 0px 2px 0px 2px;
+}
+/*стиль поля ввода количества товара в каталоге*/
+input {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 0;
+    padding-left: 4px;
+}
