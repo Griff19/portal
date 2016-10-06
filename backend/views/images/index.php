@@ -10,7 +10,7 @@ use yii\bootstrap\Modal;
 /* @var $searchModel backend\models\ImagesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Images';
+$this->title = 'Изображения';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="images-index">

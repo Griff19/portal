@@ -6,8 +6,8 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model backend\models\Images */
 
-$this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Images', 'url' => ['index']];
+$this->title = $model->img_oldname;
+$this->params['breadcrumbs'][] = ['label' => 'Изображения', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="images-view">
@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($model->img_oldname) ?></h1>
     <?= Html::img('/'.$model->img_newname, ['style' => 'width:300px'])?>
     <p>
-        <?= Html::a('Изменить', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
