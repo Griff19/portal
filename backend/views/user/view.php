@@ -12,7 +12,7 @@ use yii\widgets\Pjax;
 
 $this->title = 'Пользователь: ' . $model->username;
 $this->params['breadcrumbs'][] = ['label' => 'Пользователи', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->params['breadcrumbs'][] = $model->username;
 ?>
 <div class="user-view">
 
