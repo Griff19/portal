@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php 
         //echo $this->render('_search', ['model' => $searchModel]); 
-        echo '<p>Администратор может просматривать все заказы.</p>';
+        echo '<p>Вы можете просматривать все заказы.</p>';
     ?>
 
     <p>
