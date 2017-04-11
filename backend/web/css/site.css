@@ -90,6 +90,46 @@ a.desc:after {
     margin: 0 0 15px 0;
 }
 
+tr .glyphicon {
+    font-size: 18px;
+}
+
+.pos-top-right {
+    position: absolute;
+    top: 17px;
+    right: 5px;
+    color: white;
+}
+.rotatable {
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.triangle {
+    width: 0px;
+    height: 0px;
+    border-top: 50px solid red;
+    border-left: 50px solid transparent;
+    position: absolute;
+    top: 7px;
+    right: 7px;
+}
+
+.trapezoid {
+    border-bottom: 25px solid red;
+    border-left: 26px solid transparent;
+    border-right: 26px solid transparent;
+    height: 0;
+    width: 116px;
+    position: absolute;
+    top: 16px;
+    right: -29px;
+    box-shadow: 1px 5px 3px -3px;
+}
+
 
 
 

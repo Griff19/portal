@@ -15,6 +15,7 @@ use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 
 /**
  * GoodsController implements the CRUD actions for Goods model.
@@ -28,18 +29,19 @@ class GoodsController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index','view'],
+                        'actions' => ['index', 'view', 'catalog'],
                         'allow' => true,
-                        'roles' => ['@'],                        
+                        'roles' => ['@'],
                     ],
                     [
-                        'actions' => ['create','update','delete','uploadform','setimg','download', 'upload'],
+                        'actions' => ['create', 'update', 'delete', 'uploadform', 'set-img', 'download', 'upload',
+                            'change-status'],
                         'allow' => true,
-                        'roles' => ['operatorSQL'],
+                        'roles' => ['operator'],
                     ],
-                    
+
                 ],
-            ],    
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -56,26 +58,59 @@ class GoodsController extends Controller
     public function actionIndex($order_id = 0)
     {
         $searchModel = new GoodsSearch();
-        if(Yii::$app->user->can('operator')){
+        if (Yii::$app->user->can('operator')) {
             $tp = 0;
         } else {
 
-            if ((Yii::$app->user->can('subuser'))&&!(Yii::$app->user->can('user'))) {
+            if ((Yii::$app->user->can('subuser')) && !(Yii::$app->user->can('user'))) {
                 $user = new User();
                 $tp = $user->getParent(Yii::$app->user->id);
-                
+
             } else {
                 $customers = new Customers();
                 $tp = $customers->getTP(Yii::$app->user->id);
             }
         }
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$tp);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $tp);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'order_id' => $order_id,
         ]);
+    }
+
+    /**
+     * Новое представление списка номенклатуры в виде каталога
+     * @return string
+     */
+    public function actionCatalog()
+    {
+        $searchModel = new GoodsSearch();
+        if (Yii::$app->user->can('operator')) {
+            $tp = 0;
+        } else {
+            if ((Yii::$app->user->can('subuser')) && !(Yii::$app->user->can('user'))) {
+                $user = new User();
+                $tp = $user->getParent(Yii::$app->user->id);
+
+            } else {
+                $customers = new Customers();
+                $tp = $customers->getTP(Yii::$app->user->id);
+            }
+        }
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $tp);
+
+        if ($tp == 0)
+            return $this->render('catalog_adm', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
+        else
+            return $this->render('catalog', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
     }
 
     /**
@@ -99,7 +134,11 @@ class GoodsController extends Controller
     {
         $model = new Goods();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+            var_dump($model->status);
+            die;
+            //if ($model->discount) $model->status = Goods::DISCOUNT;
+            $model->save();
             return $this->redirect(['view', 'id' => $model->good_id]);
         } else {
             return $this->render('create', [
@@ -112,17 +151,18 @@ class GoodsController extends Controller
     /**
      * Разбираем файл и заносим данные в таблицу `goods`
      */
-    public function readfile(){
+    public function readfile()
+    {
         $filename = 'GoodsFile/GoodsPrice.txt';
         $readfile = fopen($filename, 'r');
 
-        while ($str = fgets($readfile)){
+        while ($str = fgets($readfile)) {
             $items = explode(';', $str);
             $items[0] = preg_replace('/[^a-zA-Zа-яА-ЯЁё0-9&\/ ]/u', '', $items[0]);
 
             $tp = Typeprice::find()->where(['type_price_name' => $items[4]])->one();
 
-            if (!isset($tp)){
+            if (!isset($tp)) {
                 //echo 'Пропускаем...';
                 continue;
             }
@@ -132,7 +172,7 @@ class GoodsController extends Controller
             $hash = md5($items[0] . $items[2] . $items[4]);
             $hash = substr($hash, 0, 11);
             $goodfnd = Goods::find()->where(['hash_id' => $hash])->one();
-            if(isset($goodfnd)){
+            if (isset($goodfnd)) {
                 //echo 'существует объект' . $goodfnd->good_name . '<br>';
                 $good = $this->findModel($goodfnd->good_id);
                 $good->good_name = $items[1];
@@ -160,17 +200,18 @@ class GoodsController extends Controller
         fclose($readfile);
     }
 
-     /**
+    /**
      * @return string|\yii\web\Response
      */
-    public function actionUploadform(){
+    public function actionUploadform()
+    {
         $model = new Goods();
-        
+
         if ($model->load(Yii::$app->request->post())) {
             $model->file = UploadedFile::getInstance($model, 'file');
-            if($model->file){
+            if ($model->file) {
                 $fileName = 'GoodsPrice';
-                $model->file->saveAs('GoodsFile/'.$fileName.'.'.$model->file->extension);
+                $model->file->saveAs('GoodsFile/' . $fileName . '.' . $model->file->extension);
             }
             $this->readfile();
             //die();
@@ -192,12 +233,16 @@ class GoodsController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        $model->good_price_real = $model->good_price / 100;
+        if ($model->load(Yii::$app->request->post())) {
+            $model->good_price = $model->good_price_real * 100;
+            if ($model->discount) $model->status = Goods::DISCOUNT;
+            $model->save();
             return $this->redirect(['view', 'id' => $model->good_id]);
         } else {
             return $this->render('update', [
                 'model' => $model,
+                'upload' => false,
             ]);
         }
     }
@@ -207,27 +252,47 @@ class GoodsController extends Controller
      * @param $id
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException
+     *
+     * public function actionSetimg($id)
+     * {
+     * $model = $this->findModel($id);
+     * $img = $model->good_logo;
+     * if ($model->load(Yii::$app->request->post())){
+     * $model->file = UploadedFile::getInstance($model, 'file');
+     * if ($model->file){
+     * if (Images::createImg($model->file, Goods::tableName() . $model->hash_id)){
+     * Yii::$app->session->setFlash('success', 'Изображение сохранено');
+     * } else {
+     * Yii::$app->session->setFlash('error', 'Изображение не загружено');
+     * }
+     * }
+     * } else {
+     * return $this->render('update', [
+     * 'model' => $model,
+     * 'upload' => true,
+     * ]);
+     * }
+     * return $this->redirect(['index']);
+     * }
      */
-    public function actionSetimg($id)
+
+    /**
+     * @param $id
+     * @param int $id_img
+     * @return \yii\web\Response
+     */
+    public function actionSetImg($id, $id_img = null)
     {
         $model = $this->findModel($id);
-        $img = $model->good_logo;
-        if ($model->load(Yii::$app->request->post())){
-            $model->file = UploadedFile::getInstance($model, 'file');
-            if ($model->file){
-                if (Images::createImg($model->file, Goods::tableName() . $model->hash_id)){
-                    Yii::$app->session->setFlash('success', 'Изображение сохранено');
-                } else {
-                    Yii::$app->session->setFlash('error', 'Изображение не загружено');
-                }
-            }
-        } else {
-            return $this->render('update', [
-                'model' => $model,
-                'upload' => TRUE,
-            ]);
-        }
-        return $this->redirect(['index']);
+        if ($id_img)
+            $model->good_logo = $id_img;
+        else
+            $model->good_logo = 0;
+
+        if (!$model->save())
+            Yii::$app->session->setFlash('error', serialize($model->getErrors()));
+
+        return $this->redirect(Url::previous());
     }
 
     /**
@@ -244,6 +309,23 @@ class GoodsController extends Controller
     }
 
     /**
+     * @param $id
+     * @return \yii\web\Response
+     */
+    public function actionChangeStatus($id)
+    {
+        $model = $this->findModel($id);
+        if ($model->status == Goods::DISABLE)
+            $model->status = Goods::ENABLE;
+        else
+            $model->status = Goods::DISABLE;
+
+        $model->save();
+
+        return $this->redirect(['view', 'id' => $id]);
+    }
+
+    /**
      * Загрузка файла с ФТП
      * @return \yii\web\Response
      */
@@ -252,7 +334,7 @@ class GoodsController extends Controller
         $fileloc = 'GoodsFile/GoodsPrice.txt';
         $fileftp = 'insite/GoodCost.txt';
         $ftp = new FtpWork();
-        if ($ftp->download($fileftp, $fileloc)){
+        if ($ftp->download($fileftp, $fileloc)) {
             Yii::$app->session->setFlash('success', 'файл скачан');
         } else {
             Yii::$app->session->setFlash('error', 'файл скачан');
@@ -270,7 +352,7 @@ class GoodsController extends Controller
         $fileloc = 'goodsfile\infile.txt';
         $fileftp = 'outsite\ttttt.txt';
         $ftp = new FtpWork();
-        if ($ftp->upload($fileloc, $fileftp)){
+        if ($ftp->upload($fileloc, $fileftp)) {
             Yii::$app->session->setFlash('success', 'файл загружен на сервер');
         } else {
             Yii::$app->session->setFlash('error', 'файл не загружен');

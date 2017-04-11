@@ -33,23 +33,24 @@ class GoodsSearch extends Goods
     }
 
     /**
-     * Задаем параметры поиска, для пользователей выводим товар с соответствующим типом цены
+     * РћС‚Р±РёСЂР°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РІС‹РІРѕРґР° С‚РѕРІР°СЂРѕРІ
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params,$tp = 0)
+    public function search($params, $tp = 0)
     {
         //if(Yii::$app->user->can('operatorSQL')){
         if ($tp == 0 ){
            $query = Goods::find();
         } else {
-            $query = Goods::find()->where(['typeprices_id' => $tp]);
+            $query = Goods::find()->where(['>', 'status', Goods::DISABLE])->andWhere(['typeprices_id' => $tp]);
         }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['good_name' => SORT_ASC]]
         ]);
+
         $dataProvider->pagination = FALSE;
         $this->load($params);
 

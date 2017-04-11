@@ -3,11 +3,9 @@
 namespace backend\models;
 
 use Yii;
-use backend\models\Typeprice;
-use backend\models\Basket;
 
 /**
- * This is the model class for table "goods".
+ * Модель товаров, соответствует таблице "goods"
  *
  * @property integer $good_1c_id
  * @property integer $good_id
@@ -16,13 +14,24 @@ use backend\models\Basket;
  * @property string $good_detail_guid
  * @property string $good_description
  * @property string $good_logo
+ * @property string $good_info
  * @property integer $good_price
+ * @property float $good_price_real
  * @property integer $typeprices_id
+ * @property integer $status
+ * @property string $hash
+ * @property Images $image
  */
 class Goods extends \yii\db\ActiveRecord
 {
     public $file;
     public $img_title;
+    public $good_price_real;
+    public $discount;
+
+    const DISABLE = 0;
+    const ENABLE = 1;
+    const DISCOUNT = 2;
     /**
      * @inheritdoc
      */
@@ -38,13 +47,15 @@ class Goods extends \yii\db\ActiveRecord
     {
         return [
             [['good_name', 'good_price','good_1c_id', 'good_detail_guid'], 'required'],
+            ['good_price_real', 'number'],
             [['good_price','typeprices_id'], 'integer'],
             [['good_name'], 'string', 'max' => 200],
-            [['good_logo'], 'string', 'max' => 100],
-            [['good_detail_guid'], 'string', 'max' => 36],
+            [['good_logo'], 'integer'],
+            [['good_detail_guid', 'hash'], 'string', 'max' => 36],
             [['good_1c_id','hash_id'], 'string', 'max' => 11],
             [['file'],'file', 'extensions' => ['jpeg','jpg'], 'checkExtensionByMimeType'=>false, 'skipOnEmpty'=>true],
-            ['img_title', 'string', 'max' => 500]
+            ['img_title', 'string', 'max' => 500],
+            ['discount', 'boolean']
         ];
     }
 
@@ -61,8 +72,12 @@ class Goods extends \yii\db\ActiveRecord
             'good_name' => 'Наименование',
             'good_logo' => 'Изображение',
             'good_price' => 'Цена',
+            'good_price_real' => 'Цена',
+            'good_info' => 'Подробности',
             'typeprices_id' => 'Тип цены',
             'file' => 'Файл:',
+            'discount' => 'Акция',
+            'status' => 'Статус',
         ];
     }
 
@@ -76,8 +91,6 @@ class Goods extends \yii\db\ActiveRecord
 
     /**
      * Связываем таблицу товаров с "корзиной" чтобы получать количество лежащих в "корзине".
-     *
-     *
      */
     public function getBasketCount()
     {
@@ -88,5 +101,22 @@ class Goods extends \yii\db\ActiveRecord
         } else {
             return 0;
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash()
+    {
+        return 'goods' . $this->hash_id;
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getImage()
+    {
+        return $this->hasOne(Images::className(), ['id' => 'good_logo']);
     }
 }

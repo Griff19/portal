@@ -1,6 +1,6 @@
 <?php
 use yii\helpers\Html;
-use frontend\models\ResetPasswordForm;
+
 /* @var $this yii\web\View */
 
 $this->title = 'Алтайская Буренка';
@@ -9,7 +9,8 @@ $this->title = 'Алтайская Буренка';
 <!--    <div class="alert-info" align="center"> Вопросы и предложения по работе портала отправляйте на адрес it7@altburenka.ru </div>-->
     <div class="jumbotron">
         <h3>Система онлайн заказа</h3>
-        <?= Html::a('Каталог товаров', ['goods/index'],['class' => 'btn btn-success']) ?>
+        <?= Html::a('Каталог товаров', ['goods/index'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Новый каталог', ['goods/catalog'], ['class' => 'btn btn-default']) ?>
     </div>
 
     <div class="body-content">

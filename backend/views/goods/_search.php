@@ -11,22 +11,20 @@ use yii\widgets\ActiveForm;
 <div class="goods-search">
 
     <?php $form = ActiveForm::begin([
-        'action' => ['index'],
+        'action' => ['catalog'],
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'good_id') ?>
+    <?php //$form->field($model, 'good_id') ?>
 
     <?= $form->field($model, 'good_name') ?>
 
-    <?= $form->field($model, 'good_logo') ?>
+    <?= $form->field($model, 'good_description') ?>
 
-    <?= $form->field($model, 'good_price') ?>
+    <?php //$form->field($model, 'good_price') ?>
 
-    <div class="form-group">
-        <?= Html::submitButton('Найти', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Сброс', ['class' => 'btn btn-default']) ?>
-    </div>
+    <?= Html::submitButton('Найти', ['class' => 'btn btn-primary']) ?>
+    <?= Html::resetButton('Сброс', ['class' => 'btn btn-default']) ?>
 
     <?php ActiveForm::end(); ?>
 

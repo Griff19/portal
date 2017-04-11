@@ -11,7 +11,6 @@
  * @property  string pass
  */
 
-
 class Ftp {
     private static $ip_server;
     private static $username;

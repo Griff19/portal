@@ -18,8 +18,9 @@ use yii\widgets\ActiveForm;
     } else {
         echo $form->field($model, 'good_1c_id')->textInput();
         echo $form->field($model, 'good_name')->textInput(['maxlength' => 200]); 
-        echo $form->field($model, 'good_logo')->textInput(['maxlength' => 100]); 
-        echo $form->field($model, 'good_price')->textInput();
+        echo $form->field($model, 'good_info')->textInput(['maxlength' => 100]);
+        echo $form->field($model, 'good_price_real')->textInput();
+        echo $form->field($model, 'discount')->checkbox();
     }
     
     ?>
@@ -29,7 +30,7 @@ use yii\widgets\ActiveForm;
         if ($upload){
             echo Html::submitButton('Загрузить',['class' => 'btn btn-success']);
         } else {
-            echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Редактировать', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+            echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
         }   
         ?>
     </div>

@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
     
     <?php 
     if(Yii::$app->user->can('admin')){
-        echo '<p>Администратор видит все магазины/отделы.</p>';
+        echo '<p>Вы видите все магазины/отделы.</p>';
     } else {   
         echo '<p>Закрепленные за вами магазины/отделы.</p>';
     }

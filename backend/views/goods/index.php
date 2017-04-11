@@ -42,7 +42,8 @@ $i = 0; //индекс помогает получать из провайдер
         $col = [
             [
                 'attribute' => 'good_1c_id',
-                'contentOptions' => ['style' => ' width:60px;']
+                'contentOptions' => ['style' => ' width:60px;'],
+                'visible' => Yii::$app->user->can('operator'),
             ],
             //ссылка на добавление изображения
             ['class' => Column::className(),
@@ -50,18 +51,29 @@ $i = 0; //индекс помогает получать из провайдер
                 'content' => function ($model){
                     //return Html::a('+',['setimg', 'id' => $model->good_id]);
                     return Html::a('+', ['images/create', 'owner' => Goods::tableName() . $model->hash_id]);
-                }
+                },
+                'visible' => Yii::$app->user->can('operator'),
             ],
             //наименование товара, всплывающее изображение
             [
                 'attribute' => 'good_name',
                 'format' => 'raw',
                 'value' => function($model){
+                    /** @var Goods $model */
                     $img_link = '';
-                    $img = Images::getImage(Goods::tableName() . $model->hash_id);
-                    $title = Images::getTitle(Goods::tableName() . $model->hash_id);
-                    if ($img || $title)
-                        return '<a id = "'.$model->good_id.'" name = "info" data-img = "'. $img .'" data-title = "'. $title .'" data-placement="right">'.$model->good_name.'</a>';
+                    //$img = Images::getImage(Goods::tableName() . $model->hash_id);
+                    //$title = Images::getTitle(Goods::tableName() . $model->hash_id);
+                    $img = $model->image;
+                    if ($img)
+                        return Html::a($model->good_name, 'javascript:', [
+                            'id' => $model->good_id,
+                            'name' => 'info',
+                            'data' => [
+                                    'img' => '/'.$img->img_newname,
+                                    'title' => $model->good_info,
+                                    'placement' => 'right'
+                            ]]);
+                        //return '<a id = "'.$model->good_id.'" name = "info" data-img = "/'. $img->img_newname .'" data-title = "'. $model->good_info .'" data-placement="right">'.$model->good_name.'</a>';
                     else
                         return $model->good_name;
                 },
@@ -98,7 +110,7 @@ $i = 0; //индекс помогает получать из провайдер
                 'contentOptions' => ['style' => 'padding:1px; width:84px;']
             ],
         ];
-        if (!Yii::$app->user->can('operator')) {unset($col[0]); unset($col[1]);}
+        //if (!Yii::$app->user->can('operator')) {unset($col[0]); unset($col[1]);}
     ?>
     <?php Pjax::begin();?>
     <?= GridView::widget([

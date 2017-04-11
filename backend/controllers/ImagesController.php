@@ -11,6 +11,7 @@ use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 
 /**
  * ImagesController implements the CRUD actions for Images model.
@@ -27,6 +28,11 @@ class ImagesController extends Controller
                         'actions' => ['index', 'view', 'delete'],
                         'allow' => true,
                         'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['select'],
+                        'allow' => true,
+                        'roles' => ['operator']
                     ],
                     [
                         'actions' => ['create', 'update'],
@@ -66,6 +72,21 @@ class ImagesController extends Controller
     }
 
     /**
+     * @return string
+     */
+    public function actionSelect($id_good){
+        $searchModel = new ImagesSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('select', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'id_good' => $id_good
+
+        ]);
+    }
+
+    /**
      * Displays a single Images model.
      * @param integer $id
      * @return mixed
@@ -90,8 +111,8 @@ class ImagesController extends Controller
             if ($model->file){
                 $oldname = $model->file->baseName;
                 $ext = $model->file->extension;
-                $filename = 'imgs/' . md5($model->file->baseName);
-                $model->file->saveAs($filename.'.'.$model->file->extension);
+                $filename = 'imgs/' . md5($oldname);
+                $model->file->saveAs($filename. '.' .$model->file->extension);
             }
             $model->img_newname = $filename . '.' . $ext;
             $model->img_oldname = $oldname . '.' . $ext;
@@ -99,7 +120,7 @@ class ImagesController extends Controller
                 $model->img_owner = $owner;
             $model->save();
             if ($owner)
-                return $this->redirect(['goods/index']);
+                return $this->redirect(Url::previous());
             else
                 return $this->redirect(['view', 'id' => $model->id]);
         } else {

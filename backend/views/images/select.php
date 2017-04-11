@@ -16,32 +16,13 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="images-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]);
-    Modal::begin([
-        'header' => '<div class="breadcrumb"><h4> Комментировать </h4></div>',
-        'id' => 'modal',
-        'size' => 'modal-lg'
-    ]);
-    echo '<div id="modalContent"></div>';
-    Modal::end();
-    // ?>
+
 
     <p>
         <?php
         if (Yii::$app->user->can('operator'))
             echo Html::a('Добавить изображение', ['create'], ['class' => 'btn btn-success']);
-        if ($id_act !== 0) {
-            echo Html::a('<<< Назад в документ', ['actsdoc/view', 'id' => $id_act], ['class' => 'btn btn-success']);
-            echo ' ';
-            $a = Url::to("/addcomm/".$num."/".$id_act);
-            //$a = Url::to("/index.php?r=actstable/update&id=" . $num . "&acts_id=" . $id_act);
-            echo Html::button('<< В комментарий', [
-                'class' => 'btn btn-primary',
-                'name' => 'commentButton',
 
-                'onclick' => 'buttClick("'.$a.'")' //main.js
-            ]);
-        }
         ?>
     </p>
 
@@ -54,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             ['class' => Column::className(),
                 'header' => 'Изображение',
-                'content' => function($model){
+                'content' => function ($model) {
                     return Html::img('/' . $model->img_newname, ['style' => 'width:100px']);
                 }
             ],
@@ -63,10 +44,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'img_owner',
             'img_title',
 
-            ['class' => 'yii\grid\ActionColumn',
-                'template' => '{view}{delete}',
+            ['class' => 'yii\grid\Column',
+                'content' => function ($model) use ($id_good) {
+                    return Html::a('<span class="glyphicon glyphicon-ok"></span>',
+                        ['goods/set-img', 'id' => $id_good, 'id_img' => $model->id],
+                        ['title' => 'Выбрать это изображение...']
+                    );
+                }
             ],
-
         ],
     ]); ?>
 
