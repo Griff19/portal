@@ -72,12 +72,18 @@ class GoodsController extends Controller
             }
         }
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $tp);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'order_id' => $order_id,
-        ]);
+        if ($tp == 0)
+            return $this->render('index_add', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'order_id' => $order_id,
+            ]);
+        else
+            return $this->render('index', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'order_id' => $order_id,
+            ]);
     }
 
     /**
@@ -252,7 +258,6 @@ class GoodsController extends Controller
      * @param $id
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException
-     *
      * public function actionSetimg($id)
      * {
      * $model = $this->findModel($id);

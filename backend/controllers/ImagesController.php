@@ -30,12 +30,12 @@ class ImagesController extends Controller
                         'roles' => ['@'],
                     ],
                     [
-                        'actions' => ['select'],
+                        'actions' => ['select', 'create'],
                         'allow' => true,
                         'roles' => ['operator']
                     ],
                     [
-                        'actions' => ['create', 'update'],
+                        'actions' => ['update'],
                         'allow' => true,
                         'roles' => ['admin'],
                     ],
@@ -72,6 +72,7 @@ class ImagesController extends Controller
     }
 
     /**
+     * Выбор рисунка для номерклатуры (потом можно расширить для любого объекта)
      * @return string
      */
     public function actionSelect($id_good){
@@ -112,7 +113,7 @@ class ImagesController extends Controller
                 $oldname = $model->file->baseName;
                 $ext = $model->file->extension;
                 $filename = 'imgs/' . md5($oldname);
-                $model->file->saveAs($filename. '.' .$model->file->extension);
+                $model->file->saveAs($filename. '.' . $ext);
             }
             $model->img_newname = $filename . '.' . $ext;
             $model->img_oldname = $oldname . '.' . $ext;

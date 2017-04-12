@@ -48,10 +48,11 @@ class GoodsSearch extends Goods
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['good_name' => SORT_ASC]]
+            'sort' => ['defaultOrder' => ['good_name' => SORT_ASC]],
+            'pagination' => ['pageSize' => 40],
         ]);
 
-        $dataProvider->pagination = FALSE;
+        //$dataProvider->pagination = FALSE;
         $this->load($params);
 
         if (!$this->validate()) {
@@ -66,7 +67,7 @@ class GoodsSearch extends Goods
             'good_detail_guid' => $this->good_detail_guid
         ]);
 
-        $query->andFilterWhere(['like', 'LOWER(good_name)', mb_strtolower($this->good_name)])
+        $query->andFilterWhere(['ilike', 'good_name', $this->good_name])
             ->andFilterWhere(['like', 'good_1c_id', $this->good_1c_id])
             ->andFilterWhere(['like', 'good_logo', $this->good_logo])
             ->andFilterWhere(['like', 'good_description', $this->good_description])

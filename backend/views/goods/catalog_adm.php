@@ -22,7 +22,7 @@ echo '<div class="row">';
 
 foreach ($dataProvider->models as $model) {
     /* @var $model Goods */
-
+    //var_dump($model); continue;
     if ($curr_col > $cols) {
         $curr_col = 0;
         echo '</div><div class="row">';
@@ -35,7 +35,7 @@ foreach ($dataProvider->models as $model) {
     $title = Images::getTitle(Goods::tableName() . $model->hash_id);
     ?>
     <div class="col-sm-3">
-<!--    <div class="thumbnail" style="position: relative; --><?php //echo $model->status == Goods::DISABLE ? 'background-color: #efefef;' : '' ?><!-- ">-->
+
     <div class="thumbnail" style="position: relative; <?= $model->status == Goods::DISABLE ? 'opacity: 0.5;' : '' ?> ">
     <?php if ($model->status == Goods::DISCOUNT) { ?>
         <div class="trapezoid rotatable"></div>
@@ -67,6 +67,8 @@ foreach ($dataProvider->models as $model) {
 }
 
 echo '</div>'; //row
+
+echo \yii\widgets\LinkPager::widget(['pagination' => $dataProvider->pagination]);
 
 $this->registerJs('$(".inform").popover();');
 

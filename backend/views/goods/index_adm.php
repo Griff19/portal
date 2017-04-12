@@ -38,6 +38,7 @@ $i = 0;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'tableOptions' => ['class' => 'table-bordered'],
         'columns' => [
 
             'good_id',
@@ -56,7 +57,7 @@ $i = 0;
                 {
                     //return Html::a('Добавить в корзину!',['basket/insert', 'good_id' => $model->good_id, 'count' => 1, 'price' => $model->good_price, 'str' => $dataProvider->keys[$i++]]);
                     $id = $dataProvider->keys[$i++];
-                    return '<input type="number" id = "'.$id.'" class="form-control" name="count_'.$id.'" style="float:left; width:60px" value="0" max="100" min="0">'
+                    return '<input type="number" id = "'.$id.'" name="count_'.$id.'" style="float:left; width:60px" value="0" max="100" min="0">'
                             . '<input type="hidden" id = "'.$id.'" name = "good_'.$id.'" value = "'.$id.'" >'
                             . '<input type="hidden" id = "'.$id.'" name = "price_'.$id.'" value = "'.$model->good_price.'" >';
                 

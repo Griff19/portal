@@ -33,12 +33,22 @@ class Images extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            //[['img_oldname', 'img_newname', 'img_owner'], 'required'],
+            ['file', 'image', 'extensions' => 'png, jpg, jpeg',
+                'minWidth' => 300, 'maxWidth' => 1000,
+                'minHeight' => 300, 'maxHeight' => 1000,
+            ],
             [['img_oldname', 'img_newname', 'img_owner'], 'string', 'max' => 255],
             ['img_title', 'string', 'max' => 1024]
         ];
     }
 
+    /**
+     * @param $outfile
+     * @param $infile
+     * @param $percents
+     * @param $quality
+     * @return bool
+     */
     public function imageresize($outfile,$infile,$percents,$quality) {
         try {
             $im = imagecreatefromjpeg($infile);

@@ -84,6 +84,7 @@ $i = 0; //индекс помогает получать из провайдер
                 'attribute' => 'good_description',
                 'contentOptions' => ['style' => ' width:300px;']
             ],
+            //'status',
             //цена товара
             [
                 'attribute' => 'good_price',

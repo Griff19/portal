@@ -13,9 +13,9 @@ use yii\widgets\ActiveForm;
     <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
 
     <?= $form->field($model, 'file')->fileInput()?>
-    <?= $form->field($model, 'img_oldname')->textInput(['maxlength' => 255]) ?>
-    <?= $form->field($model, 'img_newname')->textInput(['maxlength' => 255]) ?>
-    <?= $form->field($model, 'img_owner')->textInput(['maxlength' => 255]) ?>
+    <?php //$form->field($model, 'img_oldname')->textInput(['maxlength' => 255]) ?>
+    <?php //$form->field($model, 'img_newname')->textInput(['maxlength' => 255]) ?>
+    <?php //$form->field($model, 'img_owner')->textInput(['maxlength' => 255]) ?>
     <?= $form->field($model, 'img_title')->textarea(['maxlength' => 1024])?>
 
     <div class="form-group">
