@@ -73,7 +73,7 @@ class GoodsController extends Controller
         }
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $tp);
         if ($tp == 0)
-            return $this->render('index_add', [
+            return $this->render('index_adm', [
                 'searchModel' => $searchModel,
                 'dataProvider' => $dataProvider,
                 'order_id' => $order_id,

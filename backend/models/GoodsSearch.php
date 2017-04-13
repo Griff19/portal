@@ -48,7 +48,7 @@ class GoodsSearch extends Goods
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['good_name' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['good_name'=> SORT_ASC, 'good_id' => SORT_ASC]],
             'pagination' => ['pageSize' => 40],
         ]);
 

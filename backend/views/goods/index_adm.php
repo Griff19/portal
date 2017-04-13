@@ -1,8 +1,8 @@
 <?php
 
+use backend\models\Goods;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use yii\grid\Column;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -39,33 +39,28 @@ $i = 0;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table-bordered'],
+        'rowOptions' => function ($model) {
+            if ($model->status == Goods::DISABLE)
+                return ['style' => 'opacity: 0.5'];
+        },
         'columns' => [
 
             'good_id',
-            'good_name',
-
-            [
-                'attribute' => 'good_price',
+            'good_1c_id',
+            ['attribute' => 'good_name',
+                'value' => function ($model) {
+                    return Html::a($model->good_name, ['view', 'id' => $model->good_id]);
+                },
+                'format' => 'raw',
+            ],
+            'good_description',
+            ['attribute' => 'good_price',
                 'value' => function ($model){
                     return $model->good_price / 100;
                 }
             ],
             'typeprices_id',
-            ['class' => Column::className(),
-                'header' => '',
-                'content' => function ($model) use ($dataProvider,&$i) 
-                {
-                    //return Html::a('Добавить в корзину!',['basket/insert', 'good_id' => $model->good_id, 'count' => 1, 'price' => $model->good_price, 'str' => $dataProvider->keys[$i++]]);
-                    $id = $dataProvider->keys[$i++];
-                    return '<input type="number" id = "'.$id.'" name="count_'.$id.'" style="float:left; width:60px" value="0" max="100" min="0">'
-                            . '<input type="hidden" id = "'.$id.'" name = "good_'.$id.'" value = "'.$id.'" >'
-                            . '<input type="hidden" id = "'.$id.'" name = "price_'.$id.'" value = "'.$model->good_price.'" >';
-                
-                },
-                'contentOptions' => ['style' => 'width:115px'],        
-            ],
-
-            //['class' => 'yii\grid\ActionColumn'],
+            'status',
                     
         ],
     ]); 
