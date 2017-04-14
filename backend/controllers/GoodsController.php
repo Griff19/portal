@@ -158,6 +158,7 @@ class GoodsController extends Controller
     public function readfile()
     {
         ini_set('max_execution_time', 60);
+        ini_set('memory_limit', '150M');
         $filename = 'GoodsFile/GoodsPrice.txt';
         $readfile = fopen($filename, 'r');
         Goods::updateAll(['status' => 0]);
