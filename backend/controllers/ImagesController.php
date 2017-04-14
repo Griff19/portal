@@ -103,7 +103,7 @@ class ImagesController extends Controller
      * Создаем новое изображение
      * @return mixed
      */
-    public function actionCreate($owner = null)
+    public function actionCreate($owner = '')
     {
         $model = new Images();
 
@@ -117,8 +117,8 @@ class ImagesController extends Controller
             }
             $model->img_newname = $filename . '.' . $ext;
             $model->img_oldname = $oldname . '.' . $ext;
-            if ($owner)
-                $model->img_owner = $owner;
+            $model->img_owner = $owner;
+            $model->file = null;
             $model->save();
             if ($owner)
                 return $this->redirect(Url::previous());

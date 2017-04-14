@@ -33,9 +33,9 @@ class Images extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            ['file', 'image', 'extensions' => 'png, jpg, jpeg',
-                'minWidth' => 300, 'maxWidth' => 1000,
-                'minHeight' => 300, 'maxHeight' => 1000,
+            ['file', 'image', 'extensions' => 'png, jpg',
+                'minWidth' => 200, 'maxWidth' => 1000,
+                'minHeight' => 200, 'maxHeight' => 1000,
             ],
             [['img_oldname', 'img_newname', 'img_owner'], 'string', 'max' => 255],
             ['img_title', 'string', 'max' => 1024]

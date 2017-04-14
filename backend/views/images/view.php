@@ -15,6 +15,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-6">
             <h1><?= Html::encode($model->img_oldname) ?></h1>
             <?= Html::img('/' . $model->img_newname, ['style' => 'width:300px']) ?>
+
+        </div>
+        <div class="col-md-6">
             <p>
                 <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
                 <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
@@ -24,9 +27,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'method' => 'post',
                     ],
                 ]) ?>
+                <?= Html::a('Новое изображение', ['create'], ['class' => 'btn btn-success'])?>
             </p>
-        </div>
-        <div class="col-md-6">
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [

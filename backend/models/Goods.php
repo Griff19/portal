@@ -127,7 +127,7 @@ class Goods extends \yii\db\ActiveRecord
      */
     public function getImgOwn()
     {
-        $img = Images::findOne(['img_owner' => $this->good_1c_id]);
+        $img = Images::findOne(['img_owner' => trim($this->good_1c_id)]);
         return $img ? '/'. $img->img_newname : '';
     }
 }
