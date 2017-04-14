@@ -25,6 +25,7 @@ $i = 0;
     <p>
         <?= Html::a('Добавить товар', ['create'], ['class' => 'btn btn-success']) ?>
         <?= Html::a('Загрузить файл', ['uploadform'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Скачать с FTP', ['download'], ['class' => 'btn btn-success']) ?>
     </p>
     <?php Pjax::begin()?>
     <?php 

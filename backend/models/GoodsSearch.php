@@ -18,7 +18,7 @@ class GoodsSearch extends Goods
     public function rules()
     {
         return [
-            [['good_id', 'good_price','typeprices_id'], 'integer'],
+            [['good_id', 'good_price','typeprices_id', 'status'], 'integer'],
             [['good_1c_id','good_name', 'good_detail_guid', 'good_description'], 'safe'],
         ];
     }
@@ -64,13 +64,14 @@ class GoodsSearch extends Goods
         $query->andFilterWhere([
             'good_id' => $this->good_id,
             'good_price' => $this->good_price,
-            'good_detail_guid' => $this->good_detail_guid
+            'good_detail_guid' => $this->good_detail_guid,
+            'status' => $this->status,
         ]);
 
         $query->andFilterWhere(['ilike', 'good_name', $this->good_name])
             ->andFilterWhere(['like', 'good_1c_id', $this->good_1c_id])
             ->andFilterWhere(['like', 'good_logo', $this->good_logo])
-            ->andFilterWhere(['like', 'good_description', $this->good_description])
+            ->andFilterWhere(['ilike', 'good_description', $this->good_description])
             ->andFilterWhere(['like','type_price.type_price_name', $this->typeprices_id]);
 
         return $dataProvider;

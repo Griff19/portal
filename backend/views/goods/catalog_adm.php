@@ -36,12 +36,10 @@ foreach ($dataProvider->models as $model) {
     ?>
     <div class="col-sm-3">
 
-    <div class="thumbnail" style="position: relative; <?= $model->status == Goods::DISABLE ? 'opacity: 0.5;' : '' ?> ">
+    <div class="thumbnail" style="position: relative; min-height: 250px; <?= $model->status == Goods::DISABLE ? 'opacity: 0.5;' : '' ?> ">
     <?php if ($model->status == Goods::DISCOUNT) { ?>
         <div class="trapezoid rotatable"></div>
         <div class='rotatable pos-top-right'>АКЦИЯ</div>
-<!--        <div class="triangle"></div>-->
-<!--        <div class='rotatable pos-top-right' style="font-size: small">АКЦИЯ</div>-->
     <?php } ?>
     <?= Html::img($img, ['alt' => 'Нет изображения']) ?>
     <?php Url::remember(Url::current());
@@ -49,7 +47,9 @@ foreach ($dataProvider->models as $model) {
         echo Html::a('Изменить изображение', ['images/select', 'id_good' => $model->good_id]);
     ?>
     <div class="caption">
-    <?= Html::a('<h4>' . $model->good_name . '</h4>', ['goods/view', 'id' => $model->good_id]) ?>
+    <span style="font-size: smaller"><?= '1c:' . $model->good_1c_id . ' id:' . $model->good_id ?></span><br/>
+    <span style="font-size: xx-small"><?= $model->good_detail_guid ?></span>
+    <h4><?= Html::a($model->good_name, ['goods/view', 'id' => $model->good_id]) ?></h4>
     <p> <?= $model->good_description ?> </p>
     <p> Тип цены: <?= $model->tPname->type_price_name ?></p>
     <p class="lead"> <?= number_format($model->good_price / 100, 2) . 'p.' ?></p>

@@ -35,20 +35,13 @@ foreach ($dataProvider->models as $model) {
     $title = Images::getTitle(Goods::tableName() . $model->hash_id);
     ?>
     <div class="col-sm-3">
-<!--    <div class="thumbnail" style="position: relative; --><?php //echo $model->status == Goods::DISABLE ? 'background-color: #efefef;' : '' ?><!-- ">-->
-    <div class="thumbnail" style="position: relative; <?= $model->status == Goods::DISABLE ? 'opacity: 0.5;' : '' ?> ">
+
+    <div class="thumbnail" style="position: relative; min-height: 250px;">
     <?php if ($model->status == Goods::DISCOUNT) { ?>
         <div class="trapezoid rotatable"></div>
         <div class='rotatable pos-top-right'>АКЦИЯ</div>
-<!--        <div class="triangle"></div>-->
-<!--        <div class='rotatable pos-top-right' style="font-size: small">АКЦИЯ</div>-->
     <?php } ?>
     <?= Html::img($img, ['alt' => 'Нет изображения']) ?>
-    <?php
-//    Url::remember(Url::current());
-//    if (Yii::$app->user->can('operator'))
-//        echo Html::a('Изменить изображение', ['images/select', 'id_good' => $model->good_id]);
-    ?>
     <div class="caption">
     <?= Html::a('<h4>' . $model->good_name . '</h4>', ['goods/view', 'id' => $model->good_id]) ?>
     <p> <?= $model->good_description . '</p>';

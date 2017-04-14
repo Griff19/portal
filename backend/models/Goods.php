@@ -50,6 +50,8 @@ class Goods extends \yii\db\ActiveRecord
             ['good_price_real', 'number'],
             [['good_logo', 'good_price','typeprices_id', 'status'], 'integer'],
             [['good_name'], 'string', 'max' => 200],
+            ['good_description', 'string', 'max' => 255],
+            ['good_info', 'string'],
             [['good_detail_guid', 'hash'], 'string', 'max' => 36],
             [['good_1c_id','hash_id'], 'string', 'max' => 11],
             [['file'],'file', 'extensions' => ['jpeg','jpg'], 'checkExtensionByMimeType'=>false, 'skipOnEmpty'=>true],

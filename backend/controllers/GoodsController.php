@@ -52,7 +52,7 @@ class GoodsController extends Controller
     }
 
     /**
-     * Lists all Goods models.
+     * Обычный список товаров
      * @return mixed
      */
     public function actionIndex($order_id = 0)
@@ -120,7 +120,7 @@ class GoodsController extends Controller
     }
 
     /**
-     * Displays a single Goods model.
+     * Отображение товара
      * @param integer $id
      * @return mixed
      */
@@ -132,8 +132,7 @@ class GoodsController extends Controller
     }
 
     /**
-     * Creates a new Goods model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
+     * Добавление нового товара вручную
      * @return mixed
      */
     public function actionCreate()
@@ -141,9 +140,8 @@ class GoodsController extends Controller
         $model = new Goods();
 
         if ($model->load(Yii::$app->request->post())) {
-            var_dump($model->status);
-            die;
-            //if ($model->discount) $model->status = Goods::DISCOUNT;
+            if ($model->discount) $model->status = Goods::DISCOUNT;
+            $model->good_price = $model->good_price_real * 100;
             $model->save();
             return $this->redirect(['view', 'id' => $model->good_id]);
         } else {
@@ -159,9 +157,10 @@ class GoodsController extends Controller
      */
     public function readfile()
     {
+        ini_set('max_execution_time', 60);
         $filename = 'GoodsFile/GoodsPrice.txt';
         $readfile = fopen($filename, 'r');
-
+        Goods::updateAll(['status' => 0]);
         while ($str = fgets($readfile)) {
             $items = explode(';', $str);
             $items[0] = preg_replace('/[^a-zA-Zа-яА-ЯЁё0-9&\/ ]/u', '', $items[0]);
@@ -175,6 +174,8 @@ class GoodsController extends Controller
             $price = $items[5]; //проводим махинации чтобы цена была в том виде в котором надо
             $price = str_replace(',', '.', $price);
             $price = preg_replace('/[^x\d|*\.]/', '', $price);
+
+            $discount = stripos($items[3], 'акция') === false ? false : true;
             $hash = md5($items[0] . $items[2] . $items[4]);
             $hash = substr($hash, 0, 11);
             $goodfnd = Goods::find()->where(['hash_id' => $hash])->one();
@@ -187,6 +188,7 @@ class GoodsController extends Controller
                 $good->good_description = $items[3];
                 $good->good_price = $price * 100; //в базе цены хранятся в целом типе
                 $good->typeprices_id = $tp->type_price_id;
+                $good->status = $discount ? Goods::DISCOUNT : Goods::ENABLE;
                 $good->save();
             } else {
                 //echo 'создаем новый объект ' . $items[1] . '<br>';
@@ -200,6 +202,7 @@ class GoodsController extends Controller
                 $good->good_description = $items[3];
                 $good->good_price = $price * 100;
                 $good->typeprices_id = $tp->type_price_id;
+                $good->status = $discount ? Goods::DISCOUNT : Goods::ENABLE;
                 $good->save();
             }
         }
@@ -207,6 +210,7 @@ class GoodsController extends Controller
     }
 
     /**
+     * Загрузка файла с данными о товарах
      * @return string|\yii\web\Response
      */
     public function actionUploadform()
@@ -231,19 +235,21 @@ class GoodsController extends Controller
     }
 
     /**
-     * Updates an existing Goods model.
-     * If update is successful, the browser will be redirected to the 'view' page.
+     * Редактируем данные о товаре
      * @param integer $id
      * @return mixed
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $model->discount = $model->status == Goods::DISCOUNT ? true : false;
         $model->good_price_real = $model->good_price / 100;
         if ($model->load(Yii::$app->request->post())) {
             $model->good_price = $model->good_price_real * 100;
-            if ($model->discount) $model->status = Goods::DISCOUNT;
-            $model->save();
+            $model->status = $model->discount ? Goods::DISCOUNT : Goods::ENABLE;
+
+            if (!$model->save())
+                Yii::$app->session->setFlash('error', serialize($model->getErrors()));
             return $this->redirect(['view', 'id' => $model->good_id]);
         } else {
             return $this->render('update', [
@@ -254,7 +260,7 @@ class GoodsController extends Controller
     }
 
     /**
-     * Функция добавления изображения для товара.
+     * Функция добавления изображения для товара (не используется).
      * @param $id
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException
@@ -282,6 +288,7 @@ class GoodsController extends Controller
      */
 
     /**
+     * Привязка изображения к товару
      * @param $id
      * @param int $id_img
      * @return \yii\web\Response
@@ -301,8 +308,7 @@ class GoodsController extends Controller
     }
 
     /**
-     * Deletes an existing Goods model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * Удаление товара
      * @param integer $id
      * @return mixed
      */
@@ -314,6 +320,7 @@ class GoodsController extends Controller
     }
 
     /**
+     * Установка статуса, отображение и сокрытие товара в каталоге
      * @param $id
      * @return \yii\web\Response
      */
@@ -366,8 +373,7 @@ class GoodsController extends Controller
     }
 
     /**
-     * Finds the Goods model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
      * @return Goods the loaded model
      * @throws NotFoundHttpException if the model cannot be found
@@ -377,7 +383,7 @@ class GoodsController extends Controller
         if (($model = Goods::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException('Запрашиваемая страница не найдена');
         }
     }
 }

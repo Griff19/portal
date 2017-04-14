@@ -18,7 +18,8 @@ use yii\widgets\ActiveForm;
     } else {
         echo $form->field($model, 'good_1c_id')->textInput();
         echo $form->field($model, 'good_name')->textInput(['maxlength' => 200]); 
-        echo $form->field($model, 'good_info')->textInput(['maxlength' => 100]);
+        echo $form->field($model, 'good_description')->textInput(['maxlength' => 255]);
+        echo $form->field($model, 'good_info')->textarea();
         echo $form->field($model, 'good_price_real')->textInput();
         echo $form->field($model, 'discount')->checkbox();
     }
