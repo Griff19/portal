@@ -61,6 +61,7 @@ $i = 0;
                 }
             ],
             'typeprices_id',
+            'tPname.type_price_name',
             'status',
                     
         ],
