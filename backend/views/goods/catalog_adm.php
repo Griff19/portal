@@ -28,10 +28,8 @@ foreach ($dataProvider->models as $model) {
         echo '</div><div class="row">';
     }
 
-    $img = $model->image ? '/' . $model->image->img_newname : '/imgs/empty.jpg';
-//    if (!$img) {
-//        $img = '/imgs/empty.jpg';
-//    }
+    //$img = $model->image ? '/' . $model->image->img_newname : '/imgs/empty.jpg';
+    $img = $model->imgOwn;
     $title = Images::getTitle(Goods::tableName() . $model->hash_id);
     ?>
     <div class="col-sm-3">

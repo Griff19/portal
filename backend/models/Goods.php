@@ -120,4 +120,14 @@ class Goods extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Images::className(), ['id' => 'good_logo']);
     }
+
+    /**
+     * Отображение картинки по общему идентификатору
+     * @return string
+     */
+    public function getImgOwn()
+    {
+        $img = Images::findOne(['img_owner' => $this->good_1c_id]);
+        return '/'. $img->img_newname;
+    }
 }
