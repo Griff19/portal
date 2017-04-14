@@ -42,7 +42,8 @@ foreach ($dataProvider->models as $model) {
     <?= Html::img($img, ['alt' => 'Нет изображения']) ?>
     <?php Url::remember(Url::current());
     if (Yii::$app->user->can('operator'))
-        echo Html::a('Изменить изображение', ['images/select', 'id_good' => $model->good_id]);
+        //echo Html::a('Изменить изображение', ['images/select', 'id_good' => $model->good_id]);
+        echo Html::a('Изменить изображение', ['images/select2', 'good_id' => $model->good_detail_guid]);
     ?>
     <div class="caption">
     <span style="font-size: smaller"><?= '1c:' . $model->good_1c_id . ' id:' . $model->good_id ?></span><br/>

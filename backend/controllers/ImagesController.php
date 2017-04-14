@@ -30,7 +30,7 @@ class ImagesController extends Controller
                         'roles' => ['@'],
                     ],
                     [
-                        'actions' => ['select', 'create'],
+                        'actions' => ['select', 'select2', 'create'],
                         'allow' => true,
                         'roles' => ['operator']
                     ],
@@ -85,6 +85,28 @@ class ImagesController extends Controller
             'id_good' => $id_good
 
         ]);
+    }
+
+    /**
+     * @param $good_id
+     * @param null $img_id
+     * @return string
+     */
+    public function actionSelect2($good_id, $img_id = null){
+        if (isset($img_id)) {
+            $model = $this->findModel($img_id);
+            $model->img_owner = $good_id;
+            $model->save();
+        } else {
+            $searchModel = new ImagesSearch();
+            $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+            return $this->render('select2', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'good_id' => $good_id
+            ]);
+        }
     }
 
     /**
