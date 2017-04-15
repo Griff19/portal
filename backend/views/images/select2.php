@@ -21,8 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?php
         if (Yii::$app->user->can('operator'))
-            echo Html::a('Добавить изображение', ['create'], ['class' => 'btn btn-success']);
-
+            echo Html::a('Добавить изображение', ['create', 'owner' => $good_id], ['class' => 'btn btn-success']);
         ?>
     </p>
 

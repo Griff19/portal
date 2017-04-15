@@ -374,7 +374,6 @@ class GoodsController extends Controller
     }
 
     /**
-     *
      * @param integer $id
      * @return Goods the loaded model
      * @throws NotFoundHttpException if the model cannot be found

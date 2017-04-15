@@ -97,6 +97,8 @@ class ImagesController extends Controller
             $model = $this->findModel($img_id);
             $model->img_owner = $good_id;
             $model->save();
+
+            return $this->redirect(Url::previous());
         } else {
             $searchModel = new ImagesSearch();
             $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
@@ -125,21 +127,21 @@ class ImagesController extends Controller
      * Создаем новое изображение
      * @return mixed
      */
-    public function actionCreate($owner = '')
+    public function actionCreate($owner = null)
     {
         $model = new Images();
+        if (isset($owner)) $model->img_owner = $owner;
 
         if ($model->load(Yii::$app->request->post())) {
             $model->file = UploadedFile::getInstance($model, 'file');
             if ($model->file){
                 $oldname = $model->file->baseName;
                 $ext = $model->file->extension;
-                $filename = 'imgs/' . md5($oldname);
+                $filename = 'imgs/' . md5($oldname . date('d.m.Y'));
                 $model->file->saveAs($filename. '.' . $ext);
             }
             $model->img_newname = $filename . '.' . $ext;
             $model->img_oldname = $oldname . '.' . $ext;
-            $model->img_owner = $owner;
             $model->file = null;
             $model->save();
             if ($owner)

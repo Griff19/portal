@@ -28,10 +28,8 @@ foreach ($dataProvider->models as $model) {
         echo '</div><div class="row">';
     }
 
-    $img = $model->image ? '/' . $model->image->img_newname : '/imgs/empty.jpg';
-//    if (!$img) {
-//        $img = '/imgs/empty.jpg';
-//    }
+    $img = $model->imgOwn ?  : '/imgs/empty.jpg';
+
     $title = Images::getTitle(Goods::tableName() . $model->hash_id);
     ?>
     <div class="col-sm-3">
@@ -41,7 +39,7 @@ foreach ($dataProvider->models as $model) {
         <div class="trapezoid rotatable"></div>
         <div class='rotatable pos-top-right'>АКЦИЯ</div>
     <?php } ?>
-    <?= Html::img($img, ['alt' => 'Нет изображения']) ?>
+    <?= Html::img($img, ['alt' => 'Нет изображения', 'style' => 'max-height: 200px']) ?>
     <div class="caption">
     <?= Html::a('<h4>' . $model->good_name . '</h4>', ['goods/view', 'id' => $model->good_id]) ?>
     <p> <?= $model->good_description . '</p>';
@@ -59,6 +57,7 @@ foreach ($dataProvider->models as $model) {
     echo '<span class="input-group-btn">';
     echo Html::a('Заказать', 'javascript:', ['class' => 'btn btn-success',
         'onclick' => '$.get("basketadd/'. $model->hash_id .'/"+$("#'.$model->good_id.'").val(), function (data) {
+            if (!data) return false;
             $("#getTotals a").text(data);
             $("#'.$model->good_id.'").val(0);
             });'

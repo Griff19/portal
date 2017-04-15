@@ -126,6 +126,7 @@ class BasketController extends Controller
      */
     public function actionDoinsert($hash_id, $count)
     {
+        if ($count == 0) return false;
         $good = Goods::find()->where(['hash_id' => $hash_id])->one();
 
         if (isset($good)) {

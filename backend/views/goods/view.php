@@ -36,8 +36,8 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
-                    'status',
-                    'good_id',
+                    ['attribute' => 'status', 'visible' => Yii::$app->user->can('operator')],
+                    ['attribute' => 'good_id', 'visible' => Yii::$app->user->can('operator')],
                     'good_name',
                     'good_description',
                     'good_info',
@@ -48,7 +48,11 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-sm-6">
             <?php Url::remember(Url::current()); ?>
             <?= Yii::$app->user->can('operator') ? Html::a('Изменить изображение', ['images/select', 'id_good' => $model->good_id]): ''?>
-            <?= Html::a('<span class="text-danger">Удалить</span>', ['goods/set-img', 'id' => $model->good_id]) ?><br/>
+            <?php if (Yii::$app->user->can('operator')) { ?>
+            <span class="text-danger">
+                <?= Html::a('Удалить', ['goods/set-img', 'id' => $model->good_id]) ?>
+            </span><br/>
+            <?php } ?>
             <?= Html::img($model->image ? '/' . $model->image->img_newname : '/imgs/empty.jpg') ?>
         </div>
     </div

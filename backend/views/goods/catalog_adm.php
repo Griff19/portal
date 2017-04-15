@@ -39,7 +39,7 @@ foreach ($dataProvider->models as $model) {
         <div class="trapezoid rotatable"></div>
         <div class='rotatable pos-top-right'>АКЦИЯ</div>
     <?php } ?>
-    <?= Html::img($img, ['alt' => 'Нет изображения']) ?>
+    <?= Html::img($img, ['alt' => 'Нет изображения', 'style' => 'max-height: 200px']) ?>
     <?php Url::remember(Url::current());
     if (Yii::$app->user->can('operator'))
         //echo Html::a('Изменить изображение', ['images/select', 'id_good' => $model->good_id]);
