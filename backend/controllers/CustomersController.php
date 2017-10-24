@@ -1,12 +1,16 @@
 <?php
-//Контроллер обеспечивает работу с контрагентами
+/**
+ * Контроллер модели Контрагентов
+ */
 namespace backend\controllers;
 
 use Yii;
+use backend\models\PhoneSearch;
 use backend\models\Customers;
 use backend\models\CustomersSearch;
 use backend\models\Typeprice;
 use backend\models\FtpWork;
+use backend\models\ResponsibleSearch;
 use common\models\User;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -68,8 +72,20 @@ class CustomersController extends Controller
      */
     public function actionView($id)
     {
-        return $this->render('view', [
+        $queryParams = Yii::$app->request->queryParams;
+
+    	$searchPhone = new PhoneSearch();
+        $dataPhones = $searchPhone->search($queryParams, $id);
+
+        $responsibleSearch = new ResponsibleSearch();
+        $responsibleData = $responsibleSearch->search($queryParams, $id);
+
+    	return $this->render('view', [
             'model' => $this->findModel($id),
+		    'dataPhones' => $dataPhones,
+		    'searchPhone' => $searchPhone,
+		    'responsibleData' => $responsibleData,
+		    'responsibleSearch' => $responsibleSearch
         ]);
     }
 

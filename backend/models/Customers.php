@@ -1,12 +1,10 @@
 <?php
-
+/**
+ * Модель таблицы `customers` - Контрагенты.
+ */
 namespace backend\models;
 
-use Yii;
-
 /**
- * Модель таблицы "customers".
- *
  * @property integer customer_1c_id
  * @property integer customer_id
  * @property integer user_id
@@ -15,6 +13,8 @@ use Yii;
  * @property integer typeprices_id
  * @property Orders[] $orders
  * @property string inn
+ * @property string directPhone
+ * @property string directResponsible
  */
 class Customers extends \yii\db\ActiveRecord
 {
@@ -67,7 +67,9 @@ class Customers extends \yii\db\ActiveRecord
             'file' => 'Файл с данными по контрагентам',
             'typeprices_id' => 'Тип цен',
             'inn' => 'ИНН',
-            'capch' => 'Каптча:'
+            'capch' => 'Каптча:',
+	        'directPhone' => 'Телефон',
+	        'directResponsible' => 'Ответственный'
         ];
     }
 
@@ -77,7 +79,6 @@ class Customers extends \yii\db\ActiveRecord
      * @param $params
      */
     public function findAttr($attribute, $params) {
-        /* */
         $err = false;
         $model = Customers::findOne([$attribute => $this->$attribute]);
         if ($model) {
@@ -124,15 +125,50 @@ class Customers extends \yii\db\ActiveRecord
         return $this->hasOne(Typeprice::className(), ['type_price_id' => 'typeprices_id']);
     }
 
-    /**
-     * Связываем с таблицей пользователей
-     * @return ActiveQuery
-     */
+	/**
+	 * Связываем с моделью пользователей
+	 * @return \yii\db\ActiveQuery
+	 */
     public function getUsersUser(){
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
+	/**
+	 * Связываем с моделью телефонов
+	 * @return \yii\db\ActiveQuery
+	 */
+    public function getPhone(){
+    	return $this->hasMany(Phone::className(), ['customer_id' => 'customer_id']);
+    }
+
+	/**
+	 * Связываем с моделью ответственных лиц
+	 * @return \yii\db\ActiveQuery
+	 */
+    public function getResponsible(){
+    	return $this->hasMany(Responsible::className(), ['customer_id' => 'customer_id']);
+    }
+
+	/**
+	 * Получаем основной телефонный номер для текущего контрагента
+	 * @return false|null|string
+	 */
+    public function getDirectPhone(){
+    	return Phone::find()->select('phone')->where(['customer_id' => $this->customer_id])
+		    ->limit(1)->orderBy('sort')->scalar();
+    }
+
+	/**
+	 * Получаем основное ответственное лицо по контрагенту (sort = 1)
+	 * @return false|null|string
+	 */
+    public function getDirectResponsible(){
+    	return Responsible::find()->select('name')->where(['customer_id' => $this->customer_id])
+		    ->limit(1)->orderBy('sort')->scalar();
+    }
+
     /**
+     * Получаем идентификатор пользователя
      * @param $_1c_id
      * @return mixed|null
      */

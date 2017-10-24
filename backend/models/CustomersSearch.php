@@ -43,7 +43,7 @@ class CustomersSearch extends Customers
     public function search($params)
     {
         //каждому пользователю соответствуют его контрагенты
-        if(Yii::$app->user->can('admin')){
+        if(Yii::$app->user->can('telephone')){
             $query = Customers::find();
         } else {
             $query = Customers::find()->where(['user_id'=>Yii::$app->user->id]);

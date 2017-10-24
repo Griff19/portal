@@ -2,8 +2,8 @@
 
 namespace backend\controllers;
 
-use backend\models\User;
 use Yii;
+use backend\models\User;
 use backend\models\Goods;
 use backend\models\GoodsSearch;
 use backend\models\Typeprice;
@@ -16,6 +16,8 @@ use yii\web\UploadedFile;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\Url;
+use yii\helpers\Json;
+use yii\helpers\Html;
 
 /**
  * GoodsController implements the CRUD actions for Goods model.
@@ -39,6 +41,11 @@ class GoodsController extends Controller
                         'allow' => true,
                         'roles' => ['operator'],
                     ],
+	                [
+	                	'actions' => ['search-good'],
+		                'allow' => true,
+		                'roles' => ['telephone']
+	                ],
 
                 ],
             ],
@@ -371,6 +378,32 @@ class GoodsController extends Controller
             Yii::$app->session->setFlash('error', 'файл не загружен');
         }
         return $this->redirect(['index']);
+    }
+
+	/**
+	 * Генерируем код для результата фильтрации таблицы продуктов
+	 * @param $text - искомая строка в базе
+	 * @param $tp - тип цены контрегента
+	 * @return string
+	 */
+    public function actionSearchGood($text, $tp)
+    {
+    	$goods = Goods::find()->select(['id' => 'good_id', 'name' => 'good_name', 'desc' => 'good_description'])
+		    ->where(['ilike', 'good_name', $text])->andWhere(['typeprices_id' => $tp])
+		    ->asArray()
+		    ->all();
+
+    	$html = "";
+    	if ($goods)
+	        foreach ($goods as $good){
+	            $html .= '<tr>'
+		                    .'<td>' . Html::a($good['name'], '#', ['class' => 'chain']) . '</td>'
+							.'<td>' . $good['desc'] . '</td>'
+		                    .'<td>' . Html::input('number', 'count' . $good['id'], 0, ['class' => 'form-control count', 'id' => $good['id']]) . '</td>'
+		                .'</tr>';
+		    }
+
+    	return Json::encode($html);
     }
 
     /**

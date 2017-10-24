@@ -40,26 +40,25 @@ AppAsset::register($this);
                 ],
             ]);
             $menuItems = [
-                ['label' => 'Главная', 'url' => ['site/index']]
+                ['label' => 'Главная', 'url' => ['/site/index']]
             ];
             if (Yii::$app->user->isGuest) {
                 $menuItems[] = ['label' => 'Авторизация', 'url' => ['/site/login']];
             } else {
-                $menuItems[] = ['label' => 'Заказы', 'url' => ['orders/index']];
+                $menuItems[] = ['label' => 'Заказы', 'url' => ['/orders/index']];
                 $menuItems[] = ['label' => 'Заказ '. Basket::getTotals('summ')/100 .'р.',
-                                'url' => ['basket/index'],
+                                'url' => ['/basket/index'],
                                 'options' => ['style' => 'font-weight:bolder', 'id' => 'getTotals']
                                 ];
-                $menuItems[] = ['label' => 'Магазины', 'url' => ['customers/index']];
-                $menuItems[] = ['label' => 'Акты сверки', 'url' => ['actsdoc/index']];
+                $menuItems[] = ['label' => 'Магазины', 'url' => ['/customers/index']];
+                $menuItems[] = ['label' => 'Акты сверки', 'url' => ['/actsdoc/index'], 'visible' => Yii::$app->user->can('operator')];
                 $menuItems[] = [
                     'label' => 'Администрирование',
                     'items' => [
-                        ['label' => 'Пользователи', 'url' => ['user/index']],
-//                        '<li class="divider"></li>',
-//                        '<li class="dropdown-header">Dropdown Header</li>',
-                        ['label' => 'Изображения', 'url' => ['images/index']],
-                        ['label' => 'Почта', 'url' => ['emails/index']]
+	                    ['label' => 'Модуль Оператора', 'url' => ['/operator']],
+                        ['label' => 'Пользователи', 'url' => ['/user/index']],
+                        ['label' => 'Изображения', 'url' => ['/images/index']],
+                        ['label' => 'Почта', 'url' => ['/emails/index']]
                     ],
                     'visible' => Yii::$app->user->can('admin')
                 ];
@@ -67,8 +66,8 @@ AppAsset::register($this);
                 $menuItems[] = [
                     'label' => Yii::$app->user->identity->fullname,
                     'items' => [
-                        ['label' => 'Мой аккаунт', 'url' => ['user/view', 'id' => Yii::$app->user->id]],
-                        ['label' => 'Выход', 'url' => ['site/logout'],
+                        ['label' => 'Мой аккаунт', 'url' => ['/user/view', 'id' => Yii::$app->user->id]],
+                        ['label' => 'Выход', 'url' => ['/site/logout'],
                         'linkOptions' => ['data-method' => 'post']]
                     ]];
             }
@@ -81,9 +80,20 @@ AppAsset::register($this);
         ?>
 
         <div class="container">
-        <?= Breadcrumbs::widget([
-            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-        ]) ?>
+            <script>
+                if (navigator.userAgent.indexOf('MSIE') >= 0 || navigator.userAgent.indexOf('.NET') >= 0) {
+                    document.writeln(
+                        "<div class='alert alert-danger'>" +
+                        "Внимание! При использовании данного браузера возможна не корректная работа системы.<br/>" +
+                        "Для корректной работы рекомендуем использовать браузер " +
+                        "<a href='https://www.google.ru/chrome/browser/desktop/index.html' target='_blank'>Google Chrome</a>" +
+                        "</div>"
+                    );
+                }
+            </script>
+            <?= Breadcrumbs::widget([
+                'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+            ]) ?>
 
         <?= Alert::widget() ?>    
         <?= $content ?>
@@ -96,12 +106,9 @@ AppAsset::register($this);
         }
         ?>
         </div>
-
     </div>
 
     <footer class="footer">
-
-
             <div class="container">
                 <p class="text-center">
                     <?= Html::mailto('Вопросы и предложения по работе портала отправляйте на адрес it7@altburenka.ru','it7@altburenka.ru'); ?>
@@ -109,9 +116,7 @@ AppAsset::register($this);
                 <p class="pull-left">&copy; Алтайская Буренка <?= date('Y') ?></p>
                 <p class="pull-right"><?= Yii::powered() ?></p>
             </div>
-
     </footer>
-
     <?php $this->endBody() ?>
 </body>
 </html>

@@ -73,7 +73,10 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
-        return $this->render('index');
+        if (Yii::$app->user->can('telephone') && !Yii::$app->user->can('admin'))
+        	return $this->redirect('/operator');
+        else
+    	    return $this->render('index');
     }
 
     public function actionDenyindex(){
@@ -107,7 +110,10 @@ class SiteController extends Controller
                     $usr->status = User::STATUS_ACTIVE;
                     $usr->save();
                 }
-                return $this->goHome();
+                if (Yii::$app->user->can('telephone') && !Yii::$app->user->can('admin'))
+                	return $this->redirect('/operator');
+                else
+                    return $this->goHome();
             }
         } else {
             return $this->render('login', [

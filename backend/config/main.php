@@ -11,9 +11,16 @@ return [
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
-    'modules' => [],
+    'modules' => [
+	    'operator' => [
+		    'class' => 'backend\modules\operator\Operator',
+	    ],
+    ],
     'homeUrl' => '/',
     'components' => [
+	    'request' => [
+		    'baseUrl' => '',
+	    ],
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
