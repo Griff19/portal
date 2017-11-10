@@ -53,6 +53,7 @@ class GoodsController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['post'],
+                    'search-good' => ['post']
                 ],
             ],
         ];
@@ -384,26 +385,26 @@ class GoodsController extends Controller
 	 * Генерируем код для результата фильтрации таблицы продуктов
 	 * @param $text - искомая строка в базе
 	 * @param $tp - тип цены контрегента
-	 * @return string
+	 * @return string - возвращаем строку с html кодом
 	 */
     public function actionSearchGood($text, $tp)
     {
-    	$goods = Goods::find()->select(['id' => 'good_id', 'name' => 'good_name', 'desc' => 'good_description'])
+        $goods = Goods::find()->select(['id' => 'good_id', 'name' => 'good_name', 'desc' => 'good_description'])
 		    ->where(['ilike', 'good_name', $text])->andWhere(['typeprices_id' => $tp])
 		    ->asArray()
 		    ->all();
 
-    	$html = "";
+    	$thtml = '';
     	if ($goods)
 	        foreach ($goods as $good){
-	            $html .= '<tr>'
+	            $thtml .= '<tr>'
 		                    .'<td>' . Html::a($good['name'], '#', ['class' => 'chain']) . '</td>'
 							.'<td>' . $good['desc'] . '</td>'
 		                    .'<td>' . Html::input('number', 'count' . $good['id'], 0, ['class' => 'form-control count', 'id' => $good['id']]) . '</td>'
-		                .'</tr>';
+		                .'</tr>' . "\r\n";
 		    }
 
-    	return Json::encode($html);
+        return $thtml;
     }
 
     /**

@@ -28,7 +28,7 @@ class DefaultController extends Controller
 //						'roles' => ['@'],
 //					],
 					[
-						'actions' => ['index', 'order'],
+						'actions' => ['index', 'order', 'call'],
 						'allow' => true,
 						'roles' => ['telephone'],
 					],
@@ -43,6 +43,15 @@ class DefaultController extends Controller
 			],
 		];
 	}
+
+    /**
+     * @param \yii\base\Action $action
+     * @return bool
+     */
+    public function beforeAction($action) {
+        $this->enableCsrfValidation = ($action->id !== 'call');
+        return parent::beforeAction($action);
+    }
 
 	/**
      * Renders the index view for the module
