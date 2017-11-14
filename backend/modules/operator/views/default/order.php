@@ -12,10 +12,12 @@ use backend\modules\operator\assets\DefaultAsset;
  * @var $customer   \backend\models\Customers
  * @var $goodData   \yii\data\ActiveDataProvider
  * @var $goodSearch \backend\models\GoodsSearch
+ * @var $typicalOrderData \yii\data\ActiveDataProvider
  */
 
 DefaultAsset::register($this);
 ?>
+
 <!-- Javascript code -->
 <script type="text/javascript">
 
@@ -93,6 +95,7 @@ DefaultAsset::register($this);
                 }
             },
             500);
+        $('#search').focus();
     };
 
     function postInit() {
@@ -732,10 +735,95 @@ DefaultAsset::register($this);
 </script>
 <div class="row">
     <div class="col-md-8">
+        <h4>Типичная заявка:</h4>
+        <?= GridView::widget([
+            'tableOptions' => ['id' => 'typicalOrder', 'class' => 'table-bordered table-nopadding'],
+            'dataProvider' => $typicalOrderData,
+            'layout'=>"{items}",
+            'columns' => [
+                'good_id',
+                'good.good_name',
+                'count',
+                ['class' => Column::className(),
+                    'header' => 'Повторить',
+                    'content' => function($model){
+                        return '<span class="glyphicon glyphicon-ok"></span>';
+                    },
+                    'contentOptions' => ['style' => 'text-align: center']
+                ]
+            ]
+        ]); ?>
+    </div>
+
+    <div class="col-md-4">
+        <div id="divCallCtrl" class="span3 well" style='display:table-cell; vertical-align:middle'>
+            <label style="width: 100%;" align="center" id="txtRegStatus">
+            </label>
+            <label style="width: 100%;" align="center" id="txtCallStatus">
+            </label>
+            <h4><?= $customer->customer_name ?></h4>
+            <p>Ответственный: <b><?= $customer->directResponsible ?></b></p>
+            <br/>
+
+            <input type="text" style="width: 100%; height:100%;" id="txtPhoneNumber" value=""
+                   placeholder="Enter phone number to call"/>
+
+            <div style="text-align: center">
+                <input type="button" class="btn btn-success" id="btnRegister" value="LogIn" disabled
+                       onclick='sipRegister();'/>
+                <input type="button" class="btn btn-primary" id="btnCall" value="Call" disabled
+                       onclick='sipCall("call-audio");'/>
+                <input type="button" class="btn btn-primary" id="btnHangUp" value="HangUp" disabled
+                       onclick='sipHangUp();' />
+                <input type="button" class="btn btn-danger" id="btnUnRegister" value="LogOut" disabled
+                       onclick='sipUnRegister();'/>
+            </div>
+
+            <div id='divCallOptions' class='call-options' style="opacity: 1; margin-top: 0px; text-align: center;">
+                <input type="button" class="btn btn-default" style="" id="btnMute" value="Mute"
+                       onclick='sipToggleMute();'/> &nbsp;
+                <input type="button" class="btn btn-default" style="" id="btnHoldResume" value="Hold"
+                       onclick='sipToggleHoldResume();'/> &nbsp;
+                <!--                <input type="button" class="btn btn-default" style="" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();'/>-->
+                <input type="button" class="btn btn-default" style="" id="btnKeyPad" value="KeyPad"
+                       data-toggle="collapse" data-target="#divKeyPad"/>
+            </div>
+
+            <!-- KeyPad Div -->
+            <!--<div id='divKeyPad' class='span2 well div-keypad' style="width:100%; height:240px; visibility:hidden">-->
+            <div id='divKeyPad' class='collapse' style="width:100%; height:240px; text-align: center">
+                <br/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="1" onclick="sipSendDTMF('1');"/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="2" onclick="sipSendDTMF('2');"/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="3" onclick="sipSendDTMF('3');"/>
+                <br/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="4" onclick="sipSendDTMF('4');"/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="5" onclick="sipSendDTMF('5');"/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="6" onclick="sipSendDTMF('6');"/>
+                <br/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="7" onclick="sipSendDTMF('7');"/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="8" onclick="sipSendDTMF('8');"/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="9" onclick="sipSendDTMF('9');"/>
+                <br/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="*" onclick="sipSendDTMF('*');"/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="0" onclick="sipSendDTMF('0');"/>
+                <input type="button" style="width: 60px" class="btn btn-default" value="#" onclick="sipSendDTMF('#');"/>
+                <br/>
+                <!--                        <td colspan=3><input type="button" style="width: 100%" class="btn btn-medium btn-danger" value="close" onclick="closeKeyPad();"/></td>-->
+                <input type="button" style="width: 187px" class="btn btn-medium btn-danger" value="close"
+                       data-toggle="collapse" data-target="#divKeyPad"/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <h4>Номенклаура:</h4>
 		<?= GridView::widget([
-			'tableOptions' => ['id' => 'goods', 'class' => 'table-bordered'],
+			'tableOptions' => ['id' => 'goods', 'class' => 'table-bordered table-nopadding'],
 			'dataProvider' => $goodData,
 			'filterModel'  => $goodSearch,
+			'layout' => '{items}',
 			'columns'      => [
 				['attribute'          => 'good_name',
 				 'value'              => function ($model) {
@@ -757,78 +845,7 @@ DefaultAsset::register($this);
 			]]);
 		?>
     </div>
-    <div class="col-md-4">
-        <div id="divCallCtrl" class="span3 well" style='display:table-cell; vertical-align:middle'>
-            <label style="width: 100%;" align="center" id="txtRegStatus">
-            </label>
-            <label style="width: 100%;" align="center" id="txtCallStatus">
-            </label>
-            <h4><?= $customer->customer_name ?></h4>
-            <p>Ответственный: <b><?= $customer->directResponsible ?></b></p>
-            <br/>
 
-            <input type="text" style="width: 100%; height:100%;" id="txtPhoneNumber" value=""
-                   placeholder="Enter phone number to call"/>
-
-            <div style="text-align: center">
-
-                <input type="button" class="btn btn-success" id="btnRegister" value="LogIn" disabled
-                       onclick='sipRegister();'/>
-                <input type="button" class="btn btn-primary" id="btnCall" value="Call" disabled
-                       onclick='sipCall("call-audio");'/>
-                <input type="button" class="btn btn-primary" id="btnHangUp" value="HangUp" disabled
-                         onclick='sipHangUp();' />
-                <input type="button" class="btn btn-danger" id="btnUnRegister" value="LogOut" disabled
-                       onclick='sipUnRegister();'/>
-            </div>
-
-            <div id='divCallOptions' class='call-options' style="opacity: 1; margin-top: 0px; text-align: center;">
-                <input type="button" class="btn btn-default" style="" id="btnMute" value="Mute"
-                       onclick='sipToggleMute();'/> &nbsp;
-                <input type="button" class="btn btn-default" style="" id="btnHoldResume" value="Hold"
-                       onclick='sipToggleHoldResume();'/> &nbsp;
-                <!--                <input type="button" class="btn btn-default" style="" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();'/>-->
-                <input type="button" class="btn btn-default" style="" id="btnKeyPad" value="KeyPad"
-                       data-toggle="collapse" data-target="#divKeyPad"/>
-            </div>
-
-            <!-- KeyPad Div -->
-            <!--<div id='divKeyPad' class='span2 well div-keypad' style="width:100%; height:240px; visibility:hidden">-->
-            <div id='divKeyPad' class='collapse' style="width:100%; height:240px; text-align: center">
-                <br/>
-                <input type="button" style="width: 60px" class="btn btn-default" value="1" onclick="sipSendDTMF('1');"/>
-
-                <input type="button" style="width: 60px" class="btn btn-default" value="2" onclick="sipSendDTMF('2');"/>
-
-                <input type="button" style="width: 60px" class="btn btn-default" value="3" onclick="sipSendDTMF('3');"/>
-                <br/>
-                <input type="button" style="width: 60px" class="btn btn-default" value="4" onclick="sipSendDTMF('4');"/>
-
-                <input type="button" style="width: 60px" class="btn btn-default" value="5" onclick="sipSendDTMF('5');"/>
-
-                <input type="button" style="width: 60px" class="btn btn-default" value="6" onclick="sipSendDTMF('6');"/>
-                <br/>
-                <input type="button" style="width: 60px" class="btn btn-default" value="7" onclick="sipSendDTMF('7');"/>
-
-                <input type="button" style="width: 60px" class="btn btn-default" value="8" onclick="sipSendDTMF('8');"/>
-
-                <input type="button" style="width: 60px" class="btn btn-default" value="9" onclick="sipSendDTMF('9');"/>
-                <br/>
-                <input type="button" style="width: 60px" class="btn btn-default" value="*" onclick="sipSendDTMF('*');"/>
-
-                <input type="button" style="width: 60px" class="btn btn-default" value="0" onclick="sipSendDTMF('0');"/>
-
-                <input type="button" style="width: 60px" class="btn btn-default" value="#" onclick="sipSendDTMF('#');"/>
-                <br/>
-                <!--                        <td colspan=3><input type="button" style="width: 100%" class="btn btn-medium btn-danger" value="close" onclick="closeKeyPad();"/></td>-->
-                <input type="button" style="width: 187px" class="btn btn-medium btn-danger" value="close"
-                       data-toggle="collapse" data-target="#divKeyPad"/>
-
-
-            </div>
-
-        </div>
-    </div>
 </div>
 <object id="fakePluginInstance" classid="clsid:69E4A9D1-824C-40DA-9680-C7424A27B6A0"
         style="visibility:hidden;"></object>
@@ -836,6 +853,7 @@ DefaultAsset::register($this);
 <div id='divGlassPanel' class='glass-panel' style='visibility:visible'></div>
 
 <?php
+/** Скрипт для интерактивной работы страницы */
 $script = <<<JS
     var idx;
     var len;
@@ -850,8 +868,6 @@ $script = <<<JS
         $('ul.pagination').text('');
         //$('#goods > tbody').text('');
         $.post('/goods/search-good?text='+ $(this).val() +"&tp=$customer->typeprices_id", function(res) {
-            //var thtml = $.parseJSON(res);
-            //$('#goods > tbody').html(thtml);
             $('#goods > tbody').html(res);
         });
         idx = -1;
@@ -863,6 +879,7 @@ $script = <<<JS
             idx = 0; 
             $('.chain').eq(idx).focus();
             $('#goods > tbody > tr').eq(idx).addClass('success').siblings().removeClass('success');
+            console.log(idx);
          }
     });
     // Для перехода по строкам таблицы вверх и вниз, ожидаем нажатие клавиш "вверх" и "вниз" в теле таблицы
@@ -880,6 +897,7 @@ $script = <<<JS
             
             $('.chain').eq(idx).focus();
             $('#goods > tbody > tr').eq(idx).addClass('success').siblings().removeClass('success');
+            console.log(idx);
         }
     });
     // Для возобновления поиска просто начинаем вводить новую строку, произойдет переход в поле ввода
@@ -904,7 +922,7 @@ $script = <<<JS
             if (e.target.nodeName !== "INPUT")
                 $('.count').eq(idx).select();              
         }        
-    });   
+    });    
 JS;
 
 $this->registerJs($script);

@@ -391,6 +391,7 @@ class GoodsController extends Controller
     {
         $goods = Goods::find()->select(['id' => 'good_id', 'name' => 'good_name', 'desc' => 'good_description'])
 		    ->where(['ilike', 'good_name', $text])->andWhere(['typeprices_id' => $tp])
+            ->orderBy('good_name')
 		    ->asArray()
 		    ->all();
 

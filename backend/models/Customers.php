@@ -15,6 +15,7 @@ namespace backend\models;
  * @property string inn
  * @property string directPhone
  * @property string directResponsible
+ * @property TypicalOrder typicalOrder
  */
 class Customers extends \yii\db\ActiveRecord
 {
@@ -147,6 +148,13 @@ class Customers extends \yii\db\ActiveRecord
 	 */
     public function getResponsible(){
     	return $this->hasMany(Responsible::className(), ['customer_id' => 'customer_id']);
+    }
+
+    /**
+     * Связываем с моделью Типичных заказов
+     */
+    public function getTypicalOrder(){
+        return $this->hasMany(TypicalOrder::className(), ['customer_id' => 'customer_id']);
     }
 
 	/**

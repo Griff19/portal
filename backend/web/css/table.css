@@ -1,8 +1,12 @@
-/* тут переоределим стиль таблицы */
-.table-bordered td, th{
+
+.table-nopadding td, th{
     padding: 0px 2px 0px 2px;
 }
-/*стиль поля ввода количества товара в каталоге*/
+
+.success {
+    background-color: #dff0d8;
+}
+
 input {
     font-family: inherit;
     font-size: inherit;

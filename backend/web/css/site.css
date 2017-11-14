@@ -130,6 +130,16 @@ tr .glyphicon {
     box-shadow: 1px 5px 3px -3px;
 }
 
+.glyphicon-pencil:hover,
+.glyphicon-eye-open:hover,
+.glyphicon-ok:hover,
+.glyphicon-print:hover {
+    background: linear-gradient(to left, #25e825, green);
+    /*width: 18px;*/
+    color: transparent;
+    -webkit-background-clip: text;
+}
+
 
 
 

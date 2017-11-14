@@ -2,10 +2,13 @@
 
 namespace backend\modules\operator\controllers;
 
+use backend\models\TypicalOrderSearch;
 use Yii;
 use backend\models\Customers;
 use backend\models\CustomersSearch;
 use backend\models\GoodsSearch;
+use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -85,9 +88,13 @@ class DefaultController extends Controller
     	$goodSearch = new GoodsSearch();
     	$goodData = $goodSearch->search(Yii::$app->request->queryParams, $tp);
 
+        $typicalOrderSearch = new TypicalOrderSearch();
+        $typicalOrderData = $typicalOrderSearch->search(Yii::$app->request->queryParams);
+
 		return $this->render('order', [
 	            'customer' => $customer,
 			    'goodData' => $goodData,
+			    'typicalOrderData' => $typicalOrderData,
 			    'goodSearch' => $goodSearch
 		    ]);
     }
