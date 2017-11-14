@@ -400,7 +400,7 @@ class GoodsController extends Controller
 	            $thtml .= '<tr>'
 		                    .'<td>' . Html::a($good['name'], '#', ['class' => 'chain']) . '</td>'
 							.'<td>' . $good['desc'] . '</td>'
-		                    .'<td>' . Html::input('number', 'count' . $good['id'], 0, ['class' => 'form-control count', 'id' => $good['id']]) . '</td>'
+		                    .'<td>' . Html::input('number', 'count' . $good['id'], 0, ['class' => 'form-control count input-sm', 'id' => $good['id']]) . '</td>'
 		                .'</tr>' . "\r\n";
 		    }
 
