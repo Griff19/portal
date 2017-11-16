@@ -2,6 +2,7 @@
 
 namespace backend\modules\operator\controllers;
 
+use backend\models\BasketSearch;
 use backend\models\TypicalOrderSearch;
 use Yii;
 use backend\models\Customers;
@@ -91,10 +92,14 @@ class DefaultController extends Controller
         $typicalOrderSearch = new TypicalOrderSearch();
         $typicalOrderData = $typicalOrderSearch->search(Yii::$app->request->queryParams);
 
+        $basketSearch = new BasketSearch();
+        $basketData = $basketSearch->search(Yii::$app->request->queryParams, true);
+
 		return $this->render('order', [
 	            'customer' => $customer,
 			    'goodData' => $goodData,
 			    'typicalOrderData' => $typicalOrderData,
+			    'basketData' => $basketData,
 			    'goodSearch' => $goodSearch
 		    ]);
     }

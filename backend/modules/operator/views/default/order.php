@@ -3,6 +3,7 @@
  * Окно дозвона и набора заказа
  */
 
+use backend\models\Basket;
 use yii\grid\GridView;
 use yii\grid\Column;
 use yii\helpers\Html;
@@ -13,6 +14,7 @@ use backend\modules\operator\assets\DefaultAsset;
  * @var $goodData   \yii\data\ActiveDataProvider
  * @var $goodSearch \backend\models\GoodsSearch
  * @var $typicalOrderData \yii\data\ActiveDataProvider
+ * @var $basketData \yii\data\ActiveDataProvider
  */
 
 DefaultAsset::register($this);
@@ -531,6 +533,22 @@ DefaultAsset::register($this);
         }
     };
 
+    function addBasketOne(id) {
+        $.post('/basket/addone?id=' + id + '&mod=1', function(res) {
+            var res = JSON.parse(res);
+            $('#basket > tbody').html(res[0]);
+            $('#summ').html(res[1]);
+        });
+    };
+
+    function delBasketOne(id) {
+        $.post('/basket/deleteone?id=' + id + '&mod=1', function(res) {
+            var res = JSON.parse(res);
+            $('#basket > tbody').html(res[0]);
+            $('#summ').html(res[1]);
+        });
+    }
+
     // Callback function for SIP sessions (INVITE, REGISTER, MESSAGE...)
     function onSipEventSession(e /* SIPml.Session.Event */) {
         tsk_utils_log_info('==session event = ' + e.type);
@@ -737,7 +755,7 @@ DefaultAsset::register($this);
     <div class="col-md-8">
         <h4>Типичная заявка:</h4>
         <?= GridView::widget([
-            'tableOptions' => ['id' => 'typicalOrder', 'class' => 'table-bordered table-nopadding'],
+            'tableOptions' => ['id' => 'typicalOrder', 'class' => 'table table-bordered table-nopadding'],
             'dataProvider' => $typicalOrderData,
             'layout'=>"{items}",
             'columns' => [
@@ -747,12 +765,43 @@ DefaultAsset::register($this);
                 ['class' => Column::className(),
                     'header' => 'Повторить',
                     'content' => function($model){
-                        return '<span class="glyphicon glyphicon-ok"></span>';
+                        return Html::a('<span class="glyphicon glyphicon-ok"></span>', '#', [
+                                'class' => 'addBasket',
+                                'data-customer' => $model->customer_id,
+                                'data-good' => $model->good_hash,
+                                'data-count' => $model->count
+                            ]);
                     },
                     'contentOptions' => ['style' => 'text-align: center']
                 ]
             ]
         ]); ?>
+
+        <h4>Набираемый заказ:</h4>
+	    <?= GridView::widget([
+            'tableOptions' => ['id' => 'basket', 'class' => 'table table-bordered table-nopadding'],
+		    'layout' => '{items}',
+		    'dataProvider' => $basketData,
+            'columns' => [
+                'id',
+                'user_id',
+                'goods.good_name',
+                ['attribute' => 'count',
+                    'value' => function($model) {
+	                    return $model->count
+	                    . Html::a('+', 'javascript:void(0);', ['class' => 'btn btn-xs btn-primary', 'onclick' => "addBasketOne($model->id)",
+                                             'style' => 'float:right;'])
+                        . Html::a('-', 'javascript:void(0);', ['class' => 'btn btn-xs btn-primary', 'onclick' => "delBasketOne($model->id)",
+                                             'style' => 'float:right; padding: 1px 7px 1px 7px;']);
+	                },
+                    'format' => 'raw'
+                ],
+                ['attribute' => 'summ',
+                    'value' => function($model){return $model->summ / 100;}
+                ]
+            ],
+	    ])?>
+        <p style="float:right"><b>Сумма:<span id="summ"><?= Basket::getTotals('summ', $customer->customer_id)?></span></b></p>
     </div>
 
     <div class="col-md-4">
@@ -784,7 +833,7 @@ DefaultAsset::register($this);
                        onclick='sipToggleMute();'/> &nbsp;
                 <input type="button" class="btn btn-default" style="" id="btnHoldResume" value="Hold"
                        onclick='sipToggleHoldResume();'/> &nbsp;
-                <!--                <input type="button" class="btn btn-default" style="" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();'/>-->
+                <!--<input type="button" class="btn btn-default" style="" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();'/>-->
                 <input type="button" class="btn btn-default" style="" id="btnKeyPad" value="KeyPad"
                        data-toggle="collapse" data-target="#divKeyPad"/>
             </div>
@@ -809,23 +858,24 @@ DefaultAsset::register($this);
                 <input type="button" style="width: 60px" class="btn btn-default" value="0" onclick="sipSendDTMF('0');"/>
                 <input type="button" style="width: 60px" class="btn btn-default" value="#" onclick="sipSendDTMF('#');"/>
                 <br/>
-                <!--                        <td colspan=3><input type="button" style="width: 100%" class="btn btn-medium btn-danger" value="close" onclick="closeKeyPad();"/></td>-->
+                <!--<td colspan=3><input type="button" style="width: 100%" class="btn btn-medium btn-danger" value="close" onclick="closeKeyPad();"/></td>-->
                 <input type="button" style="width: 187px" class="btn btn-medium btn-danger" value="close"
                        data-toggle="collapse" data-target="#divKeyPad"/>
             </div>
         </div>
     </div>
 </div>
+
 <div class="row">
     <div class="col-md-12">
         <h4>Номенклаура:</h4>
 		<?= GridView::widget([
-			'tableOptions' => ['id' => 'goods', 'class' => 'table-bordered table-nopadding'],
+			'tableOptions' => ['id' => 'goods', 'class' => 'table table-bordered table-nopadding'],
 			'dataProvider' => $goodData,
 			'filterModel'  => $goodSearch,
 			'layout' => '{items}',
 			'columns'      => [
-				['attribute'          => 'good_name',
+                ['attribute'          => 'good_name',
 				 'value'              => function ($model) {
 					 return Html::a($model->good_name, '#');
 				 },
@@ -833,6 +883,9 @@ DefaultAsset::register($this);
 				 'filterInputOptions' => ['id' => 'search', 'class' => 'form-control', 'autocomplete' => 'off']
 				],
 				'good_description',
+                ['attribute' => 'good_price',
+                    'value' => function($model){return $model->good_price / 100;}
+                ],
 				['class'   => Column::className(),
 				 'header'  => 'Количество',
 				 'content' => function ($model) {
@@ -857,6 +910,7 @@ DefaultAsset::register($this);
 $script = <<<JS
     var idx;
     var len;
+    var customer = "$customer->customer_id";
     // Останавливаем "всплытие" события 'change' чтобы предотвратить стандартную обработку этого события
     // и не допустить обновления страницы
     $('#search').on('change', function(e) {
@@ -879,7 +933,7 @@ $script = <<<JS
             idx = 0; 
             $('.chain').eq(idx).focus();
             $('#goods > tbody > tr').eq(idx).addClass('success').siblings().removeClass('success');
-            console.log(idx);
+            
          }
     });
     // Для перехода по строкам таблицы вверх и вниз, ожидаем нажатие клавиш "вверх" и "вниз" в теле таблицы
@@ -897,7 +951,7 @@ $script = <<<JS
             
             $('.chain').eq(idx).focus();
             $('#goods > tbody > tr').eq(idx).addClass('success').siblings().removeClass('success');
-            console.log(idx);
+            
         }
     });
     // Для возобновления поиска просто начинаем вводить новую строку, произойдет переход в поле ввода
@@ -905,9 +959,16 @@ $script = <<<JS
     // при нажатии клавиши "enter" происходит переход к следующей строке
     $('#goods > tbody').on('keypress', function(e) {
         if (e.keyCode === 13) {
+            var c = $('#'+e.target.id).val();
+            $.post('/basket/insert?customer_id='+ customer +
+                '&good_id='+ e.target.id + 
+                '&count=' + c, function(res) {
+                    $('#basket > tbody').html(res);      
+            });
             idx += 1; 
             $('.chain').eq(idx).focus();
             $('#goods > tbody > tr').eq(idx).addClass('success').siblings().removeClass('success');
+            
             return true
         }        
         
@@ -922,7 +983,31 @@ $script = <<<JS
             if (e.target.nodeName !== "INPUT")
                 $('.count').eq(idx).select();              
         }        
-    });    
+    }); 
+    
+    $('.addBasket').on('click', function(){
+        $.post('/basket/insert?customer_id='+ $(this).data('customer') +
+            '&good_hash='+ $(this).data('good') + 
+            '&count=' + $(this).data('count'), function(res) {
+                $('#basket > tbody').html(res);      
+        });
+    });
+    
+    // $('.addBasketOne').click(function() {
+    //     $.post('/basket/addone?id=' + $(this).data('id') + '&mod=1', function(res) {
+    //         $('#basket > tbody').html(res);
+    //     });  
+    // });
+    //
+    // $('.delBasketOne').click(function() {
+    //     $.post('/basket/deleteone?id=' + $(this).data('id') + '&mod=1', function(res) {
+    //         $('#basket > tbody').html(res);  
+    //     });  
+    // });
+    
+    
+    
+    
 JS;
 
 $this->registerJs($script);

@@ -16,6 +16,7 @@ class m171111_181250_create_typical_order_table extends Migration
             'id' => $this->primaryKey(),
 	        'customer_id' => $this->integer()->notNull()->comment('идентификатор контрагента'),
 	        'good_id' => $this->integer()->notNull()->comment('идентификатор товара'),
+	        'good_hash' => $this->string(11)->notNull()->comment('хеш товара'),
 	        'count' => $this->integer()->comment('количество')
         ]);
 

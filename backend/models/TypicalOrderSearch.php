@@ -32,7 +32,7 @@ class TypicalOrderSearch extends TypicalOrder
     }
 
     /**
-     * Creates data provider instance with search query applied
+     * Готовим данные для отображения Типичной заявки
      *
      * @param array $params
      *
@@ -40,7 +40,7 @@ class TypicalOrderSearch extends TypicalOrder
      */
     public function search($params)
     {
-        $query = TypicalOrder::find(['customer_id' => $params['customer_id']]);
+        $query = TypicalOrder::find()->where(['customer_id' => $params['customer_id']]);
 
         // add conditions that should always apply here
 

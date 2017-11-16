@@ -33,16 +33,20 @@ class BasketSearch extends Basket
         return Model::scenarios();
     }
 
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
-     * @return ActiveDataProvider
-     */
-    public function search($params)
+	/**
+	 * Creates data provider instance with search query applied
+	 *
+	 * @param array $params
+	 * @param null  $mod
+	 * @return ActiveDataProvider
+	 */
+    public function search($params, $mod = null)
     {
-        $query = Basket::find()->where(['user_id' => Yii::$app->user->id]);
+        if ($mod){
+	        $query = Basket::find()->where(['user_id' => $params['customer_id']]);
+        } else {
+	        $query = Basket::find()->where(['user_id' => Yii::$app->user->id]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

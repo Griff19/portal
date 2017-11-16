@@ -6,12 +6,14 @@ use yii\db\ActiveRecord;
 use Yii;
 
 /**
- * This is the model class for table "basket".
+ * Модель для таблицы "Корзина" - "basket".
  *
  * @property integer $id
- * @property integer $good_id
+ * @property string $good_id
+ * @property integer $user_id
  * @property integer $count
  * @property integer $summ
+ * @property Goods $goods
  */
 class Basket extends ActiveRecord
 {
@@ -34,7 +36,7 @@ class Basket extends ActiveRecord
             [['user_id','good_id', 'count', 'summ'], 'required'],
             [['user_id', 'count', 'summ'], 'integer'],
             [['good_id'], 'string', 'max' => 11],
-            [['good_1c'],'safe'],
+            [['good_1c'], 'safe'],
         ];
     }
 
@@ -45,20 +47,29 @@ class Basket extends ActiveRecord
     {
         return [
             'order_date' => 'Дата отгрузки',
-            'id' => 'Ид строки',
+            'id' => 'ID',
             'good_1c' => 'Код товара',
             'good_id' => 'Наименование',
             'count' => 'Количество',
             'summ' => 'Сумма',
         ];
     }
-    //Получаем количество по столбцу
-    public function getTotals($field)
+
+	/**
+	 * Получаем сумму по столбцу
+	 * @param string $field
+	 * @param null $customer_id
+	 *
+	 * @return mixed
+	 */
+    public static function getTotals($field, $customer_id = null)
     {
-        $command = Yii::$app->db->createCommand('SELECT sum('. $field .') as res FROM basket WHERE user_id =' . Yii::$app->user->id);
-        $result = $command->queryAll();
-        
-        return $result[0]['res'];
+	    if ($customer_id)
+	        $sum = Basket::find()->where(['user_id' => $customer_id])->sum($field);
+	    else
+		    $sum = Basket::find()->where(['user_id' => Yii::$app->user->id])->sum($field);
+
+	    return $sum / 100;
     }
 
     //Получаем количество строк в корзине...
@@ -68,7 +79,8 @@ class Basket extends ActiveRecord
         $dataProvider = $searchModel->search(['user_id' => Yii::$app->user->id]);
         return $dataProvider->totalCount;        
     }
-    //Привязываем таблицу товаров...
+
+    /** Связываем с моделью Товаров */
     public function getGoods()
     {
         return $this->hasOne(Goods::className(), ['hash_id' => 'good_id']);

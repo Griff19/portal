@@ -1,5 +1,5 @@
 
-.table-nopadding td, th{
+.table-nopadding tbody > tr > td {
     padding: 0px 2px 0px 2px;
 }
 
@@ -12,4 +12,8 @@ input {
     font-size: inherit;
     line-height: 0;
     padding-left: 4px;
+}
+
+tr:hover {
+    background-color: rgb(238, 238, 238);
 }

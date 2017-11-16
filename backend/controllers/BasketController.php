@@ -24,7 +24,9 @@ class BasketController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index','insert','inserttobasket','delete','deleteall','deleteone','doinsert','addone'],
+                        'actions' => ['index','insert','inserttobasket',
+	                        'delete','deleteall','deleteone',
+	                        'doinsert','addone', 'insert'],
                         'allow' => true,
                         'roles' => ['@'],                        
                     ],                    
@@ -44,6 +46,33 @@ class BasketController extends Controller
     public function beforeAction($action) {
         $this->enableCsrfValidation = (($action->id !== 'insert') and ($action->id !== 'inserttobasket'));
         return parent::beforeAction($action);
+    }
+
+	/**
+	 * После ajax-запроса получаем данные из таблицы и представляем их в виде html
+	 * @param $customer_id
+	 * @return string
+	 */
+    public static function htmlBasketRows($customer_id)
+    {
+	    $basketData = Basket::find()->where(['user_id' => $customer_id])->orderBy('id')->all();
+	    $html = '';
+	    foreach ($basketData as $basket) {
+		    $good_name = $basket->goods->good_name;
+		    $html .= "<tr>"
+			    ."<td>$basket->id</td>" //идентификатор
+			    ."<td>$basket->user_id</td>" //контрегент
+			    ."<td>$good_name</td>" //номенклатура
+			    ."<td>$basket->count"
+		            .'<a class="btn btn-xs btn-primary" href="javascript:void(0);" onclick="addBasketOne('. $basket->id .')" style="float:right;">+</a>'
+		            .'<a class="btn btn-xs btn-primary" href="javascript:void(0);" onclick="delBasketOne('. $basket->id .')" style="float:right; padding: 1px 7px 1px 7px;" >-</a>'
+			    ."</td>" //количество
+			    .'<td>'. $basket->summ / 100 .'</td>' //сумма
+			    ."</tr>";
+	    }
+		$json[] = $html;
+	    $json[] = Basket::getTotals('summ', $customer_id);
+	    return json_encode($json);
     }
 
     /**
@@ -74,53 +103,50 @@ class BasketController extends Controller
     }
 
     /**
-     *Создаем заказ разом из окна каталоги по кнопке "Заказать!"
-     * @return \yii\web\Response
+     * Добавление товаров в корзину с рабочей страницы оператора
+     * @return string
      * @internal param int $good_id
      * @internal param int $count
      * @internal param float $price
      */
-    public function actionInsert()
+    public function actionInsert($customer_id, $good_hash = null, $good_id = null, $count)
     {        
-//        $post = Yii::$app->request->post();
-//        $a = 0;
-//        foreach ($post as $key => $item){
-//            if (strcasecmp($key, 'GoodsSearch')==0){continue;}//пропускаем параметры поиска
-//            //собираем данные
-//
-//            if (FALSE !== (strpos($key, 'count'))){$count = $item; $a++;}
-//            if (FALSE !== (strpos($key, 'good'))){$good = $item; $a++;}
-//            if (FALSE !== (strpos($key, 'price'))){$price = $item; $a++;}
-//
-//            if ($a == 3)
-//            {
-//                if ($count == 0){
-//                    $count = 0; $good = 0; $price = 0; $a = 0;
-//                    continue;
-//                }
-//                //echo '->' . $count .' '. $good .' '. $price . '<br>';
-//                $model = new Basket();
-//                $model->user_id = Yii::$app->user->id;
-//                $model->good_id = $good;
-//                //$post = Yii::$app->request->post();
-//                $model->count = $count;
-//                $model->summ = ($count * $price);//тут цена приходит целым числом - корректировать не надо
-//                $model->save();
-//
-//                $count = 0; $good = 0; $price = 0;
-//                $a = 0;
-//            }
-//        }
-        //$page = ceil($str / 20);
-        return $this->redirect(['orders/create', 'amount' => Basket::getTotals('summ')/100]);
+		if ($good_hash)
+    	    $good = Goods::findOne(['hash_id' => $good_hash]);
+		else
+			$good = Goods::findOne(['good_id' => $good_id]);
+
+		if ($good){
+			$price = $good->good_price;
+
+			$basket = Basket::find()->where(['user_id' => $customer_id, 'good_id' => $good->hash_id])->one();
+			if ($basket){
+				if ($count == 0){
+					$basket->delete();
+				} else {
+					$basket->count = $count;
+					$basket->summ  = $count * $price;
+					$basket->save();
+				}
+			} else {
+				$model = new Basket();
+				$model->user_id = $customer_id;
+				$model->good_id = $good->hash_id;
+				$model->count = $count;
+				$model->summ = $count * $price;
+				$model->save();
+			}
+		}
+
+		return self::htmlBasketRows($customer_id);
     }
 
     /**
-     * Процедура работает при помощи jQuery, вызывется из views/goods/index.php
+     * Процедура работает при помощи Ajax, вызывется из views/goods/index.php
      * изменяет заказ добавляя или удаляя позиции из "корзины"
      * @param $hash_id
      * @param $count
-     * @return string
+     * @return string вставляется в шапку страницы
      * @throws \Exception
      * @internal param $id_good
      */
@@ -228,7 +254,7 @@ class BasketController extends Controller
         return $this->redirect(['index']);
     }
     
-    /*
+    /**
      * Полностью очищаем предварительный заказ (корзину)
      */
     public function actionDeleteall()
@@ -237,15 +263,18 @@ class BasketController extends Controller
         return $this->redirect(['goods/index']);
     }
 
-    /**
-     * Удаляем одну штуку в строке "предварительного заказа"
-     * @param $id
-     * @return mixed
-     * @throws NotFoundHttpException
-     */
-    public function actionDeleteone($id)
+	/**
+	 * Удаляем одну штуку в строке "предварительного заказа"
+	 *
+	 * @param integer $id идентификатор строки корзины
+	 * @param null    $mod режим вызова функции ajax или нет
+	 *
+	 * @return mixed
+	 */
+    public function actionDeleteone($id, $mod = null)
     {
-        $model = $this->findModel($id);
+        /** @var Basket $model */
+    	$model = $this->findModel($id);
         $count = $model->count;
         $summ = $model->summ;
         $price = $summ / $count;
@@ -259,16 +288,22 @@ class BasketController extends Controller
             $model->save();
             //return $this->redirect(['index']);
         }
-        return $this->redirect(['index']);        
+
+        if ($mod)
+        	return self::htmlBasketRows($model->user_id);
+        else
+            return $this->redirect(['index']);
     }
 
-    /**
-     * Добавляем одну штуку товара в строке "предварительного заказа"
-     * @param $id
-     * @return mixed
-     * @throws NotFoundHttpException
-     */
-    public function actionAddone($id)
+	/**
+	 * Добавляем одну штуку товара в строке "предварительного заказа"
+	 *
+	 * @param integer $id илентификатор строки корзины
+	 * @param null    $mod режим вызова функции ajax или нет
+	 *
+	 * @return mixed
+	 */
+    public function actionAddone($id, $mod = null)
     {
         $model = $this->findModel($id);
         $count = $model->count;
@@ -284,7 +319,11 @@ class BasketController extends Controller
             $model->save();
             //return $this->redirect(['index']);
         }
-        return $this->redirect(['index']);
+
+        if ($mod)
+        	return self::htmlBasketRows($model->user_id);
+        else
+            return $this->redirect(['index']);
     }
 
     /**

@@ -389,7 +389,7 @@ class GoodsController extends Controller
 	 */
     public function actionSearchGood($text, $tp)
     {
-        $goods = Goods::find()->select(['id' => 'good_id', 'name' => 'good_name', 'desc' => 'good_description'])
+        $goods = Goods::find()->select(['id' => 'good_id', 'name' => 'good_name', 'price' => 'good_price', 'desc' => 'good_description'])
 		    ->where(['ilike', 'good_name', $text])->andWhere(['typeprices_id' => $tp])
             ->orderBy('good_name')
 		    ->asArray()
@@ -399,12 +399,12 @@ class GoodsController extends Controller
     	if ($goods)
 	        foreach ($goods as $good){
 	            $thtml .= '<tr>'
-		                    .'<td>' . Html::a($good['name'], '#', ['class' => 'chain']) . '</td>'
-							.'<td>' . $good['desc'] . '</td>'
-		                    .'<td>' . Html::input('number', 'count' . $good['id'], 0, ['class' => 'form-control count input-sm', 'id' => $good['id']]) . '</td>'
+		                    .'<td>'. Html::a($good['name'], '#', ['class' => 'chain']) .'</td>'
+							.'<td>'. $good['desc'] .'</td>'
+		                    .'<td>'. $good['price'] / 100 .'</td>'
+		                    .'<td>'. Html::input('number', 'count' . $good['id'], 0, ['class' => 'form-control count input-sm', 'id' => $good['id']]) .'</td>'
 		                .'</tr>' . "\r\n";
 		    }
-
         return $thtml;
     }
 
