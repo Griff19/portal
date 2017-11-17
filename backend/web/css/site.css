@@ -135,7 +135,6 @@ tr .glyphicon {
 .glyphicon-ok:hover,
 .glyphicon-print:hover {
     background: linear-gradient(to left, #25e825, green);
-    /*width: 18px;*/
     color: transparent;
     -webkit-background-clip: text;
 }

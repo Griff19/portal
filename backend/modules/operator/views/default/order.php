@@ -18,6 +18,8 @@ use backend\modules\operator\assets\DefaultAsset;
  */
 
 DefaultAsset::register($this);
+$this->title = "Заявка";
+
 ?>
 
 <!-- Javascript code -->
@@ -801,7 +803,10 @@ DefaultAsset::register($this);
                 ]
             ],
 	    ])?>
-        <p style="float:right"><b>Сумма:<span id="summ"><?= Basket::getTotals('summ', $customer->customer_id)?></span></b></p>
+        <p style="float:right">
+            <b>Сумма:<span id="summ"><?= Basket::getTotals('summ', $customer->customer_id)?></span>р.</b>
+            <?= Html::a('Принять', ['/orders/create', 'amount' => 1], ['class' => 'btn btn-success']);?>
+        </p>
     </div>
 
     <div class="col-md-4">
@@ -912,7 +917,7 @@ $script = <<<JS
     var len;
     var customer = "$customer->customer_id";
     // Останавливаем "всплытие" события 'change' чтобы предотвратить стандартную обработку этого события
-    // и не допустить обновления страницы
+    // и не допустить обновления страницы при изменении поля
     $('#search').on('change', function(e) {
         e.stopPropagation();  
     });
@@ -936,7 +941,7 @@ $script = <<<JS
             
          }
     });
-    // Для перехода по строкам таблицы вверх и вниз, ожидаем нажатие клавиш "вверх" и "вниз" в теле таблицы
+    // Для перехода по строкам таблицы вверх и вниз, ловим нажатие клавиш "вверх" и "вниз" в теле таблицы
     // соответствующим образом изменяем индекс текущего элемента +1 или -1
     $('#goods > tbody').on('keydown', function(e) {
         if (e.target.nodeName !== "INPUT"){ 
@@ -963,7 +968,9 @@ $script = <<<JS
             $.post('/basket/insert?customer_id='+ customer +
                 '&good_id='+ e.target.id + 
                 '&count=' + c, function(res) {
-                    $('#basket > tbody').html(res);      
+                    var res = JSON.parse(res);
+                    $('#basket > tbody').html(res[0]);
+                    $('#summ').html(res[1]);
             });
             idx += 1; 
             $('.chain').eq(idx).focus();
@@ -984,30 +991,16 @@ $script = <<<JS
                 $('.count').eq(idx).select();              
         }        
     }); 
-    
+    // Добавляем данные в заказ из таблицы "Типичная заявка"
     $('.addBasket').on('click', function(){
         $.post('/basket/insert?customer_id='+ $(this).data('customer') +
             '&good_hash='+ $(this).data('good') + 
             '&count=' + $(this).data('count'), function(res) {
-                $('#basket > tbody').html(res);      
+                var res = JSON.parse(res);
+                $('#basket > tbody').html(res[0]);
+                $('#summ').html(res[1]);
         });
-    });
-    
-    // $('.addBasketOne').click(function() {
-    //     $.post('/basket/addone?id=' + $(this).data('id') + '&mod=1', function(res) {
-    //         $('#basket > tbody').html(res);
-    //     });  
-    // });
-    //
-    // $('.delBasketOne').click(function() {
-    //     $.post('/basket/deleteone?id=' + $(this).data('id') + '&mod=1', function(res) {
-    //         $('#basket > tbody').html(res);  
-    //     });  
-    // });
-    
-    
-    
-    
+    });    
 JS;
 
 $this->registerJs($script);

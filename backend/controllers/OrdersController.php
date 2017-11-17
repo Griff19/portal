@@ -93,14 +93,12 @@ class OrdersController extends Controller
     }
 
     /**
-     * Creates a new Orders model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
+     * Создаем новый заказ
      * @return mixed
      */
     public function actionCreate($amount = 0)
     {
         $model = new Orders();
-        //$date = 0;
 
         if ($model->load(Yii::$app->request->post())) {
 
@@ -124,6 +122,21 @@ class OrdersController extends Controller
                 'amount' => $amount,
             ]);
         }
+    }
+
+    public function actionCreateFromBasket($customer_id, $amount)
+    {
+        $model = new Orders();
+        $model->customers_customer_id = $customer_id;
+        $model->order_amount = $amount;
+        $model->user_id = Yii::$app->user->id;
+        $model->status = 'Черновик';
+        $model->order_date = date('Y-m-d', strtotime("now +1 day"));
+        $model->save();
+
+        Logs::add('Создан заказ: ' . $model->order_id . ' на сумму: ' . $model->order_amount/100);
+        return $this->redirect(['listofgoods/insertall', 'order_id' => $model->order_id, 'customer_id' => $customer_id]);
+
     }
 
     /**

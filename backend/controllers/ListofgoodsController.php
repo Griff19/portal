@@ -152,8 +152,13 @@ class ListofgoodsController extends Controller
         return $this->redirect(['orders/view', 'id' => $order_id]);
     }
 
-    //Создаем заказ прямо из корзины
-    public function actionInsertall($order_id)
+    /**
+     * Создаем заказ на основе данных в корзине
+     * @param integer $order_id идентификатор заказа
+     * @param integer $customer_id идентификатор контрагента, если задано то функция вызвана со страницы оператора
+     * @return \yii\web\Response
+     */
+    public function actionInsertall($order_id, $customer_id = null)
     {
         if ($order_id == 0) $this->redirect(['basket/index']);
         $order = Orders::findOne($order_id);
@@ -163,7 +168,10 @@ class ListofgoodsController extends Controller
         } else {
             $amount = 0;
         }
-        $basket = Basket::findAll(['user_id' => Yii::$app->user->id]);
+        if ($customer_id)
+            $basket = Basket::findAll(['user_id' => $customer_id]);
+        else
+            $basket = Basket::findAll(['user_id' => Yii::$app->user->id]);
         //for($i=0; $i < Basket::getCount(); $i++){
         
         foreach ($basket as $modelb){
@@ -180,10 +188,13 @@ class ListofgoodsController extends Controller
         $order->order_amount = $amount;
         $order->save();
 
-        Basket::deleteAll(['user_id' => Yii::$app->user->id]);
-        return $this->redirect(['orders/view', 'id' => $order_id]);
-        //var_dump($basket);
-        //die();
+        if ($customer_id) {
+            Basket::deleteAll(['user_id' => $customer_id]);
+            return $this->redirect(['operator']);
+        } else {
+            Basket::deleteAll(['user_id' => Yii::$app->user->id]);
+            return $this->redirect(['orders/view', 'id' => $order_id]);
+        }
     }
 
     /**
