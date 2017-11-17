@@ -390,7 +390,7 @@ class GoodsController extends Controller
     public function actionSearchGood($text, $tp)
     {
         $goods = Goods::find()->select(['id' => 'good_id', 'name' => 'good_name', 'price' => 'good_price', 'desc' => 'good_description'])
-		    ->where(['ilike', 'good_name', $text])->andWhere(['typeprices_id' => $tp])
+		    ->where(['ilike', 'good_name', "$text%", false])->andWhere(['typeprices_id' => $tp])
             ->orderBy('good_name')
 		    ->asArray()
 		    ->all();

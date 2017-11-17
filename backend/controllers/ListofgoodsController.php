@@ -190,7 +190,8 @@ class ListofgoodsController extends Controller
 
         if ($customer_id) {
             Basket::deleteAll(['user_id' => $customer_id]);
-            return $this->redirect(['operator']);
+            //return $this->redirect(['operator']);
+            return $this->redirect(['orders/view', 'id' => $order_id]);
         } else {
             Basket::deleteAll(['user_id' => Yii::$app->user->id]);
             return $this->redirect(['orders/view', 'id' => $order_id]);

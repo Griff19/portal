@@ -804,8 +804,8 @@ $this->title = "Заявка";
             ],
 	    ])?>
         <p style="float:right">
-            <b>Сумма:<span id="summ"><?= Basket::getTotals('summ', $customer->customer_id)?></span>р.</b>
-            <?= Html::a('Принять', ['/orders/create', 'amount' => 1], ['class' => 'btn btn-success']);?>
+            <b>Сумма:<span id="summ"><?= Basket::getTotals('summ', $customer->customer_id) ?></span>р.</b>
+            <?= Html::a('Принять', ['/orders/create-from-basket', 'customer_id' => $customer->customer_id, 'amount' => Basket::getTotals('summ', $customer->customer_id)], ['class' => 'btn btn-success']);?>
         </p>
     </div>
 

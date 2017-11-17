@@ -42,6 +42,11 @@ class OrdersController extends Controller
                         'allow' => true,
                         'roles' => ['operatorSQL'],
                     ],
+                    [
+                        'actions' => ['create-from-basket'],
+                        'allow' => true,
+                        'roles' => ['telephone'],
+                    ],
                 ],
             ],
             'verbs' => [
