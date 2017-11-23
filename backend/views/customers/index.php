@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     $cols = [
         ['class' => 'yii\grid\SerialColumn'],
-        //'customer_id',
+        ['attribute' => 'customer_id', 'visible' => Yii::$app->user->can('admin')],
         [
             'attribute' => 'user_id',
             'value' => 'usersUser.fullname',

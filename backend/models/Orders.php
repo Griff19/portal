@@ -3,7 +3,7 @@
 namespace backend\models;
 
 /**
- * This is the model class for table "orders".
+ * Модель для таблицы Заказы "orders".
  *
  * @property integer $order_id
  * @property string $order_timestamp
@@ -17,7 +17,12 @@ namespace backend\models;
  */
 class Orders extends \yii\db\ActiveRecord
 {
-    /**
+	const SCENARIO_SAFE = 'safe';
+
+	const STATUS_CREATE = 'Черновик';
+	const STATUS_PLACE = 'Размещен';
+	const STATUS_PROCESSED = 'Обработан';
+	/**
      * @inheritdoc
      */
     public static function tableName()
@@ -40,7 +45,13 @@ class Orders extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
+    public function scenarios() {
+	    $scenarios                      = parent::scenarios();
+	    $scenarios[self::SCENARIO_SAFE] = ['order_amount', 'order_timestamp', 'customers_customer_id', 'user_id', 'status'];
+	    return $scenarios;
+    }
+
+	/**
      * @inheritdoc
      */
     public function attributeLabels()

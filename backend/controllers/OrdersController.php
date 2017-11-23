@@ -1,8 +1,11 @@
 <?php
-
+/**
+ * Контроллер для модели Заказы (Orders)
+ */
 namespace backend\controllers;
 
 use Yii;
+use backend\models\Basket;
 use backend\models\Orders;
 use backend\models\OrdersSearch;
 use backend\models\ListofgoodsSearch;
@@ -15,10 +18,6 @@ use yii\web\ForbiddenHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 
-
-/**
- * OrdersController implements the CRUD actions for Orders model.
- */
 class OrdersController extends Controller
 {
     public function behaviors()
@@ -59,7 +58,7 @@ class OrdersController extends Controller
     }
 
     /**
-     * Lists all Orders models.
+     * Генерируем список всех заказов
      * @return mixed
      */
     public function actionIndex()
@@ -81,7 +80,7 @@ class OrdersController extends Controller
     }
 
     /**
-     * Displays a single Orders model.
+     * Открываем один заказ
      * @param integer $id
      * @return mixed
      */
@@ -129,19 +128,45 @@ class OrdersController extends Controller
         }
     }
 
-    public function actionCreateFromBasket($customer_id, $amount)
+	/**
+	 * Создаем через ajax заказ из корзины со страницы оператора
+	 * @param integer $customer_id идентификатор контрагента
+	 * @return string
+	 */
+    public function actionCreateFromBasket($customer_id)
     {
-        $model = new Orders();
+        $amount = Basket::getTotals('summ', $customer_id);
+
+    	$model = new Orders();
         $model->customers_customer_id = $customer_id;
-        $model->order_amount = $amount;
+        $model->order_amount = $amount * 100;
         $model->user_id = Yii::$app->user->id;
-        $model->status = 'Черновик';
+        $model->status = Orders::STATUS_CREATE;
         $model->order_date = date('Y-m-d', strtotime("now +1 day"));
         $model->save();
 
-        Logs::add('Создан заказ: ' . $model->order_id . ' на сумму: ' . $model->order_amount/100);
-        return $this->redirect(['listofgoods/insertall', 'order_id' => $model->order_id, 'customer_id' => $customer_id]);
+        Logs::add('Создан заказ: ' . $model->order_id . ' на сумму: ' . $amount);
 
+	    $str = "Заказ №$model->order_id на сумму {$amount}р.";
+
+        $listofgoods = new ListofgoodsController('listofgoods', $this->modules);
+		$create = $listofgoods->actionInsertall($model->order_id, $customer_id);
+		$processed = false;
+		if ($create) {
+			$str .= " успешно создан";
+			$model->status = Orders::STATUS_PLACE;
+			if ($model->save()) {
+				Logs::add('Размещен заказ: ' . $model->order_id . ' на сумму: ' . $amount);
+				$str .= " и размещён";
+				$processed = true; //todo: использовать для определения цвета сообщения
+			} else {
+				$str .= " но не размещён...";
+			}
+		} else {
+			$str .= " не удалось заполнить и разместить...";
+		}
+
+		return $str;
     }
 
     /**
@@ -183,7 +208,6 @@ class OrdersController extends Controller
 
     /**
      * Размещение заказа на исполнение.
-     *
      * @param integer $id
      * @return mixed
      */
@@ -191,7 +215,7 @@ class OrdersController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model->status = 'Размещен';
+        $model->status = Orders::STATUS_PLACE;
         $model->save();
         Logs::add('Размещен заказ: ' . $model->order_id . ' на сумму: ' . $model->order_amount/100);
         return $this->redirect(['index']);
@@ -199,23 +223,24 @@ class OrdersController extends Controller
 
     /**
      * Отмена размещенного заказа.
-     *
      * @param integer $id
      * @return mixed
      */
     public function actionUnplace($id)
     {
-        $model = $this->findModel($id);
-
-        $model->status = 'Черновик';
-        $model->save();
-        Logs::add('Снят с размещения заказ: ' . $model->order_id . ' на сумму: ' . $model->order_amount/100);
-        return $this->redirect(['index']);
+    	$model = $this->findModel($id);
+		$model->scenario = Orders::SCENARIO_SAFE;
+        $model->status = Orders::STATUS_CREATE;
+        if ($model->save()) {
+	        Logs::add('Снят с размещения заказ: ' . $model->order_id . ' на сумму: ' . $model->order_amount / 100);
+        } else {
+        	Yii::$app->session->setFlash('error', serialize($model->errors));
+        }
+	    return $this->redirect(['index']);
     }
 
     /**
-     * поместить заказ в обработанные
-     *
+     * Поместить заказ в обработанные
      * @param integer $id
      * @return mixed
      */
@@ -223,7 +248,7 @@ class OrdersController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model->status = 'Обработан';
+        $model->status = Orders::STATUS_PROCESSED;
         $model->save();
         Logs::add('Оператор обработал заказ: ' . $model->order_id . ' на сумму: ' . $model->order_amount/100);
         return $this->redirect(['index']);
@@ -231,7 +256,6 @@ class OrdersController extends Controller
 
     /**
      * убрать из обработанных, только для админов
-     *
      * @param integer $id
      * @return mixed
      */
@@ -239,15 +263,14 @@ class OrdersController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model->status = 'Размещен';
+        $model->status = Orders::STATUS_PLACE;
         $model->save();
         Logs::add('Оператор отменил обработку заказа: ' . $model->order_id . ' на сумму: ' . $model->order_amount/100);
         return $this->redirect(['index']);
     }
 
     /**
-     * Updates an existing Orders model.
-     * If update is successful, the browser will be redirected to the 'view' page.
+     * Редактируем дынные заказа. После - возвращаемся в окно просмотра заказа
      * @param integer $id
      * @return mixed
      */
@@ -268,8 +291,7 @@ class OrdersController extends Controller
     }
 
     /**
-     * Deletes an existing Orders model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * Удаление черновика заказа. После удаления возвращаемся к списку заказов.
      * @param integer $id
      * @return mixed
      * @throws ForbiddenHttpException
@@ -279,7 +301,7 @@ class OrdersController extends Controller
     public function actionDelete($id)
     {
         $model = $this->findModel($id);
-        if ($model->status == 'Черновик') {
+        if ($model->status == Orders::STATUS_CREATE) {
             $list = new Listofgoods;
             $list->deleteAll(['orders_order_id' => $id]);
             $model->delete();
@@ -315,7 +337,7 @@ class OrdersController extends Controller
         $orderSearch = new OrdersSearch();
         $dpOrder = $orderSearch->search(Yii::$app->request->queryParams);
         //модель для работы с текущими заказами
-        $orders = Orders::find()->where(['status' => 'Размещен'])->all();
+        $orders = Orders::find()->where(['status' => Orders::STATUS_PLACE])->all();
 
         $w = fopen($filename, 'a');//открываем файл для записи
         foreach ($orders as $dt) {
@@ -340,7 +362,7 @@ class OrdersController extends Controller
                 $strtofile .= "\r\n";
                 fputs($w, $strtofile);//пишем строку в файл
             }
-            $dt->status = 'Обработан';
+            $dt->status = Orders::STATUS_PROCESSED;
             $dt->save();
         };
         fclose($w);  //закрываем файл

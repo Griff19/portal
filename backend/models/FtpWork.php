@@ -14,9 +14,9 @@ use backend\helpers\Logs;
  */
 class FtpWork
 {
-    private static $ip_server;
-    private static $username;
-    private static $pass;
+    private $ip_server;
+    private $username;
+    private $pass;
 
     /**
      * Инициируем свойства

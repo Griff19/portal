@@ -76,14 +76,14 @@ class BasketController extends Controller
     }
 
     /**
-     * Lists all Basket models.
+     * Список строк в корзине. (Не используется)
      * @return mixed
      */
     public function actionIndex()
     {
         $searchModel = new BasketSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        //$dataProvider->setPagination(50);
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -91,8 +91,8 @@ class BasketController extends Controller
     }
 
     /**
-     * Displays a single Basket model.
-     * @param integer $id
+     * Отображение строки корзины. (Не используется)
+     * @param integer $id идентификатор строки конзмны
      * @return mixed
      */
     public function actionView($id)
@@ -102,13 +102,16 @@ class BasketController extends Controller
         ]);
     }
 
-    /**
-     * Добавление товаров в корзину с рабочей страницы оператора
-     * @return string
-     * @internal param int $good_id
-     * @internal param int $count
-     * @internal param float $price
-     */
+	/**
+	 * Добавление товаров в корзину с рабочей страницы оператора /operator
+	 *
+	 * @param integer $customer_id идентификатор контрагента
+	 * @param null|string $good_hash хеш номенклатуры
+	 * @param null|integer $good_id идентификатор номенклатуры
+	 * @param integer $count количество, добавляемое в корзину
+	 *
+	 * @return string
+	 */
     public function actionInsert($customer_id, $good_hash = null, $good_id = null, $count)
     {        
 		if ($good_hash)
@@ -253,14 +256,22 @@ class BasketController extends Controller
 
         return $this->redirect(['index']);
     }
-    
-    /**
-     * Полностью очищаем предварительный заказ (корзину)
-     */
-    public function actionDeleteall()
+
+	/**
+	 * Полностью очищаем предварительный заказ (корзину)
+	 *
+	 * @param null $customer_id
+	 * @return \yii\web\Response|string
+	 */
+    public function actionDeleteall($customer_id = null)
     {
-        Basket::deleteAll(['user_id' => Yii::$app->user->id]);
-        return $this->redirect(['goods/index']);
+        if ($customer_id) {
+	        Basket::deleteAll(['user_id' => $customer_id]);
+	        return true;
+        } else {
+	        Basket::deleteAll(['user_id' => Yii::$app->user->id]);
+	        return $this->redirect(['goods/index']);
+        }
     }
 
 	/**

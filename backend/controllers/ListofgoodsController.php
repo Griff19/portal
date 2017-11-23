@@ -156,7 +156,7 @@ class ListofgoodsController extends Controller
      * Создаем заказ на основе данных в корзине
      * @param integer $order_id идентификатор заказа
      * @param integer $customer_id идентификатор контрагента, если задано то функция вызвана со страницы оператора
-     * @return \yii\web\Response
+     * @return \yii\web\Response|boolean
      */
     public function actionInsertall($order_id, $customer_id = null)
     {
@@ -190,8 +190,7 @@ class ListofgoodsController extends Controller
 
         if ($customer_id) {
             Basket::deleteAll(['user_id' => $customer_id]);
-            //return $this->redirect(['operator']);
-            return $this->redirect(['orders/view', 'id' => $order_id]);
+            return true;
         } else {
             Basket::deleteAll(['user_id' => Yii::$app->user->id]);
             return $this->redirect(['orders/view', 'id' => $order_id]);

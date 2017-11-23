@@ -172,7 +172,10 @@ class GoodsController extends Controller
         Goods::updateAll(['status' => 0]);
         while ($str = fgets($readfile)) {
             $items = explode(';', $str);
+	        if (strpos($items[0], '~') !== false) continue;
+            //убираем все непечатные символы из строки (могут встречаться вначале файла)
             $items[0] = preg_replace('/[^a-zA-Zа-яА-ЯЁё0-9&\/ ]/u', '', $items[0]);
+
 
             $tp = Typeprice::find()->where(['type_price_name' => $items[4]])->one();
 
