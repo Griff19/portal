@@ -399,7 +399,7 @@ class GoodsController extends Controller
     	if ($goods)
 	        foreach ($goods as $good){
 	            $thtml .= '<tr>'
-		                    .'<td>'. Html::a($good['name'], '#', ['class' => 'chain']) .'</td>'
+		                    .'<td>'. Html::a($good['name'], '#', ['class' => 'chain', 'id' => $good['id']]) .'</td>'
 							.'<td>'. $good['desc'] .'</td>'
 		                    .'<td>'. $good['price'] / 100 .'</td>'
 		                    .'<td>'. Html::input('number', 'count' . $good['id'], 0, ['class' => 'form-control count input-sm', 'id' => $good['id']]) .'</td>'

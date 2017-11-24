@@ -523,7 +523,7 @@ $this->title = "Заявка";
             default:
                 break;
         }
-    };
+    }
 
     function addBasketOne(id) {
         $.post('/basket/addone?id=' + id + '&mod=1', function(res) {
@@ -531,7 +531,7 @@ $this->title = "Заявка";
             $('#basket > tbody').html(res[0]);
             $('#summ').html(res[1]);
         });
-    };
+    }
 
     function delBasketOne(id) {
         $.post('/basket/deleteone?id=' + id + '&mod=1', function(res) {
@@ -539,13 +539,19 @@ $this->title = "Заявка";
             $('#basket > tbody').html(res[0]);
             $('#summ').html(res[1]);
         });
-    };
+    }
     
     function createOrder(customer, amount) {
         $.post('/orders/create-from-basket?customer_id=' + customer + '&amount=' + amount, function (res) {
             $('#alert').addClass('alert alert-success fade in');
             $('#alert').html(res);
         })
+    }
+
+    function scrollToElement(theElement) {
+        //var destination = $(theElement).offset().top;
+        var destination = theElement.offset().top - 500;
+        $('html').animate({ scrollTop: destination }, 10);
     }
 
     // Callback function for SIP sessions (INVITE, REGISTER, MESSAGE...)
@@ -893,8 +899,10 @@ $script = <<<JS
                 if (idx > 0) idx -= 1;
                 else idx = 0;
             } 
-            
-            $('.chain').eq(idx).focus();
+            var elem = $('.chain').eq(idx);
+            elem.focus();
+            scrollToElement(elem);
+            console.log(elem.attr('id'));
             $('#goods > tbody > tr').eq(idx).addClass('success').siblings().removeClass('success');            
         }
     });
@@ -903,6 +911,7 @@ $script = <<<JS
     // при нажатии клавиши "enter" происходит переход к следующей строке
     $('#goods > tbody').on('keypress', function(e) {
         if (e.keyCode === 13) {
+            console.log(e.target.id);
             var c = $('#'+e.target.id).val();
             $.post('/basket/insert?customer_id='+ customer +
                 '&good_id='+ e.target.id + 
