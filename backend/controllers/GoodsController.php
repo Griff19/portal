@@ -165,7 +165,7 @@ class GoodsController extends Controller
      */
     public function readfile()
     {
-        ini_set('max_execution_time', 60);
+        ini_set('max_execution_time', 420);
         ini_set('memory_limit', '250M');
         $filename = 'GoodsFile/GoodsPrice.txt';
         $readfile = fopen($filename, 'r');
@@ -174,15 +174,12 @@ class GoodsController extends Controller
             $items = explode(';', $str);
 	        if (strpos($items[0], '~') !== false) continue;
             //убираем все непечатные символы из строки (могут встречаться вначале файла)
-            $items[0] = preg_replace('/[^a-zA-Zа-яА-ЯЁё0-9&\/ ]/u', '', $items[0]);
-
+            //$items[0] = preg_replace('/[^a-zA-Zа-яА-ЯЁё0-9&\/ ]/u', '', $items[0]);
 
             $tp = Typeprice::find()->where(['type_price_name' => $items[4]])->one();
 
-            if (!isset($tp)) {
-                //echo 'Пропускаем...';
-                continue;
-            }
+            if (!isset($tp)) { continue; }
+
             $price = $items[5]; //проводим махинации чтобы цена была в том виде в котором надо
             $price = str_replace(',', '.', $price);
             $price = preg_replace('/[^x\d|*\.]/', '', $price);
@@ -190,10 +187,10 @@ class GoodsController extends Controller
             $discount = stripos($items[3], 'акция') === false ? false : true;
             $hash = md5($items[0] . $items[2] . $items[4]);
             $hash = substr($hash, 0, 11);
-            $goodfnd = Goods::find()->where(['hash_id' => $hash])->one();
-            if (isset($goodfnd)) {
+            $good = Goods::find()->where(['hash_id' => $hash])->one();
+            if (isset($good)) {
                 //echo 'существует объект' . $goodfnd->good_name . '<br>';
-                $good = $this->findModel($goodfnd->good_id);
+                //$good = $this->findModel($goodfnd->good_id);
                 $good->good_name = $items[1];
                 //$good->good_1c_id = $items[0];
                 //$good->good_detail_guid = $items[2];
