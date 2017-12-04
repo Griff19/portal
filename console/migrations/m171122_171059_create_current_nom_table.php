@@ -14,7 +14,7 @@ class m171122_171059_create_current_nom_table extends Migration
     {
         $this->createTable('current_nom', [
             'id' => $this->primaryKey(),
-	        'good_1c_id' => $this->string(5)->notNull()->comment('идентификатор в системе 1с'),
+	        'good_1c_id' => $this->string(11)->notNull()->comment('идентификатор в системе 1с'),
 	        'guid_1c' => $this->string(36)->notNull()->comment('guid идентификатор в 1с')
         ]);
 

@@ -33,6 +33,7 @@ use backend\models\Typeprice;
         echo $form->field($model, 'typeprices_id')->dropDownList(
         ArrayHelper::map(Typeprice::find()->all(), 'type_price_id','type_price_name'),
         ['prompt' => 'Выберите тип цен']);
+        echo $form->field($model, 'min_amount')->input('number');
     }
             ?>
 
@@ -41,7 +42,7 @@ use backend\models\Typeprice;
         if ($upload){
             echo Html::submitButton('Загрузить',['class' => 'btn btn-success']);
         } else {
-            echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Редактировать', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+            echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
         }   
         ?>
     </div>

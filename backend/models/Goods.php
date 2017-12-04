@@ -1,26 +1,27 @@
 <?php
-
+/**
+ * Модель для таблицы Товары "goods"
+ */
 namespace backend\models;
 
 use Yii;
 
 /**
- * Модель товаров, соответствует таблице "goods"
- *
- * @property integer $good_1c_id
- * @property integer $good_id
- * @property string $good_name
- * @property string $hash_id
- * @property string $good_detail_guid
- * @property string $good_description
- * @property string $good_logo
- * @property string $good_info
- * @property integer $good_price
- * @property float $good_price_real
- * @property integer $typeprices_id
- * @property integer $status
+ * @property integer $good_1c_id идентификатор номенклатуры в 1с
+ * @property integer $good_id местный идентификатор
+ * @property string $good_name наименование
+ * @property string $hash_id дополнительный уникальный ключ
+ * @property string $good_detail_guid внутренний идентификатор в 1с
+ * @property string $good_description описание разновидности товара
+ * @property string $good_logo адрес картинки
+ * @property string $good_info информация под картинкой
+ * @property integer $good_price цена * 100 (в базе хранится в целом виде )
+ * @property float $good_price_real цена
+ * @property integer $typeprices_id идентификатор типа цен
+ * @property integer $status активный или не активный товар
  * @property string $hash
  * @property Images $image
+ * @property CurrentNom $currentNom
  */
 class Goods extends \yii\db\ActiveRecord
 {
@@ -88,6 +89,15 @@ class Goods extends \yii\db\ActiveRecord
     public function getTPname()
     {
         return $this->hasOne(Typeprice::className(), ['type_price_id' => 'typeprices_id']);
+    }
+
+	/**
+	 * Связываем с моделью актуальной номенклатуры
+	 * @return \yii\db\ActiveQuery
+	 */
+    public function getCurrentNom()
+    {
+    	return $this->hasOne(CurrentNom::className(), ['good_1c_id' => 'good_1c_id', 'guid_1c' => 'good_detail_guid']);
     }
 
     /**

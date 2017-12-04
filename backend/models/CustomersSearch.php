@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use backend\models\Customers;
+use backend\models\Orders;
 
 /**
  * CustomersSearch represents the model behind the search form about `backend\models\Customers`.
@@ -34,19 +35,23 @@ class CustomersSearch extends Customers
     }
 
     /**
-     * Creates data provider instance with search query applied
-     *
+     * Выбираем данные по контрагентам для контроллера
+	 * Каждому пользователю соответствуют его контрегенты
+	 * Телефонный оператор видит всех активных контрегентов у которых указаны телефоны и у них нет размещенных заказов
      * @param array $params
      *
      * @return ActiveDataProvider
      */
     public function search($params)
     {
-        //каждому пользователю соответствуют его контрагенты
         if(Yii::$app->user->can('telephone')){
-            $query = Customers::find();
+            $query = Customers::find()->where('phone IS NOT NULL')->andWhere(['customers.status' => Customers::STATUS_ACTIVE])
+				->andWhere("orders.status <> :status OR orders.status IS NULL", [':status' => Orders::STATUS_PLACE])
+				->orderBy('sort')
+	            ->joinWith('phone')->joinWith('orders');
         } else {
-            $query = Customers::find()->where(['user_id'=>Yii::$app->user->id]);
+            $query = Customers::find()->where(['user_id'=>Yii::$app->user->id])
+				->andWhere(['customers.status' => Customers::STATUS_ACTIVE]);
         }
         
         $dataProvider = new ActiveDataProvider([
@@ -64,7 +69,7 @@ class CustomersSearch extends Customers
         $query->joinWith('typePrices');
         
         $query->andFilterWhere([
-            'customer_id' => $this->customer_id,
+            'customers.customer_id' => $this->customer_id,
             //'user_id' => $this->user_id,
             //'typeprices_id' => $this->typeprices_id,
         ]);

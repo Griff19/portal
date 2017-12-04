@@ -44,6 +44,7 @@ class GoodsSearch extends Goods
            $query = Goods::find();
         } else {
             $query = Goods::find()->where(['>', 'status', Goods::DISABLE])->andWhere(['typeprices_id' => $tp]);
+            $query->joinWith('currentNom', true, 'RIGHT JOIN')->andWhere('guid_1c IS NOT NULL');
         }
 
         $dataProvider = new ActiveDataProvider([

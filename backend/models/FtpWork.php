@@ -21,16 +21,16 @@ class FtpWork
     /**
      * Инициируем свойства
      */
-    function __construct(){
+    function __construct() {
         $this->ip_server = Yii::$app->params['ftp']['server'];
         $this->username = Yii::$app->params['ftp']['user'];
         $this->pass = Yii::$app->params['ftp']['pass'];
     }
 
     /**
-     * Скачиваем файл с сервера
-     * @param string $server_file
-     * @param string $local_file
+     * Скачиваем файл с сервера ftp
+     * @param string $server_file имя файла на ftp
+     * @param string $local_file имя файла в web
      * @return bool
      */
     public function download($server_file, $local_file){
@@ -42,7 +42,7 @@ class FtpWork
             return false;
         }
         $login_result = ftp_login($conn_id, $this->username, $this->pass);
-        Logs::add('Результат авторизации на ftp: ' . $login_result);
+        Logs::add('Авторизации на ftp: ' . $login_result);
         ftp_pasv($conn_id, true);
 
         $dir = dirname($server_file); //Получаем имя каталога
@@ -53,7 +53,7 @@ class FtpWork
 
         if (ftp_get($conn_id, $local_file, $filename, FTP_BINARY)){
             ftp_close($conn_id);
-            Logs::add('Файл скачан ' . $server_file . ' как ' . $local_file);
+            Logs::add('Файл ' . $server_file . 'скачан как ' . $local_file);
             return true;
         } else {
             ftp_close($conn_id);
@@ -62,6 +62,7 @@ class FtpWork
     }
 
     /**
+     * Скачиваем каталог с сервера
      * @param $server_catalog
      * @param $local_catalog
      * @return bool

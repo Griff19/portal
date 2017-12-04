@@ -63,7 +63,7 @@ $i = 0;
             'typeprices_id',
             'tPname.type_price_name',
             'status',
-                    
+            'currentNom.good_1c_id'
         ],
     ]); 
     ?>

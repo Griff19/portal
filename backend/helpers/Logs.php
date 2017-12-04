@@ -1,9 +1,6 @@
 <?php
 /**
- *
- * User: ivan
- * Date: 01.12.2015
- * Time: 11:22
+ * РџРёС€РµРј Р»РѕРі СЂР°Р±РѕС‚С‹ СЃРёСЃС‚РµРјС‹
  */
 
 namespace backend\helpers;
@@ -13,8 +10,6 @@ use backend\models\User;
 use DateTime;
 
 /**
- * Пишем лог работы сисемы.
- * Class Logs
  * @package backend\helpers
  */
 class Logs
@@ -22,14 +17,24 @@ class Logs
     const LOG_DIR = 'logs/log';
 
     public function add($str){
-
-        $ipuser = Yii::$app->request->userIP;
+	    if (php_sapi_name() == 'cli') {
+	    	echo $str . "\r\n";
+		    $userIp = '127.0.0.1';
+		    $userId = 'console';
+		    $userName = 'console';
+		    $fileLog = __DIR__ . '/../../backend/web/' . self::LOG_DIR;
+	    } else {
+		    $userIp = Yii::$app->request->userIP;
+		    $userId = Yii::$app->user->id;
+		    $userName = User::getName($userId);
+		    $fileLog = self::LOG_DIR;
+	    }
 
         $date = new DateTime();
-        $over = $date->format('Y-m-d H:i:s') . '; '.$ipuser.'; ' .Yii::$app->user->id . '; ' . User::getName(Yii::$app->user->id) . '; ';
+        $over = $date->format('Y-m-d H:i:s') . '; '.$userIp.'; ' . $userId . '; ' . $userName . '; ';
 
-        $w = fopen(Logs::LOG_DIR, 'a');//открываем файл для записи в конец
-        fputs($w, $over . $str . "\r\n");//пишем строку в файл
-        fclose($w);  //закрываем файл
+        $w = fopen($fileLog, 'a');//РѕС‚РєСЂС‹РІР°РµРј С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё РІ РєРѕРЅРµС†
+        fputs($w, $over . $str . "\r\n");//РїРёС€РµРј СЃС‚СЂРѕРєСѓ РІ С„Р°Р№Р»
+        fclose($w);  //Р·Р°РєСЂС‹РІР°РµРј С„Р°Р№Р»
     }
 }

@@ -126,12 +126,13 @@ class GoodsController extends Controller
                 'dataProvider' => $dataProvider,
             ]);
     }
-
-    /**
-     * Отображение товара
-     * @param integer $id
-     * @return mixed
-     */
+	
+	/**
+	 * Отображение товара
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException
+	 */
     public function actionView($id)
     {
         return $this->render('view', [
@@ -242,12 +243,13 @@ class GoodsController extends Controller
             ]);
         }
     }
-
-    /**
-     * Редактируем данные о товаре
-     * @param integer $id
-     * @return mixed
-     */
+	
+	/**
+	 * Редактируем данные о товаре
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException
+	 */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
@@ -295,13 +297,14 @@ class GoodsController extends Controller
      * return $this->redirect(['index']);
      * }
      */
-
-    /**
-     * Привязка изображения к товару
-     * @param $id
-     * @param int $id_img
-     * @return \yii\web\Response
-     */
+	
+	/**
+	 * Привязка изображения к товару
+	 * @param     $id
+	 * @param int $id_img
+	 * @return \yii\web\Response
+	 * @throws NotFoundHttpException
+	 */
     public function actionSetImg($id, $id_img = null)
     {
         $model = $this->findModel($id);
@@ -315,24 +318,28 @@ class GoodsController extends Controller
 
         return $this->redirect(Url::previous());
     }
-
-    /**
-     * Удаление товара
-     * @param integer $id
-     * @return mixed
-     */
+	
+	/**
+	 * Удаление товара
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException
+	 * @throws \Exception
+	 * @throws \yii\db\StaleObjectException
+	 */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
-
-    /**
-     * Установка статуса, отображение и сокрытие товара в каталоге
-     * @param $id
-     * @return \yii\web\Response
-     */
+	
+	/**
+	 * Установка статуса, отображение и сокрытие товара в каталоге
+	 * @param $id
+	 * @return \yii\web\Response
+	 * @throws NotFoundHttpException
+	 */
     public function actionChangeStatus($id)
     {
         $model = $this->findModel($id);
@@ -347,7 +354,7 @@ class GoodsController extends Controller
     }
 
     /**
-     * Загрузка файла с ФТП
+     * Скачиваем файл с ftp
      * @return \yii\web\Response
      */
     public function actionDownload()
@@ -382,24 +389,28 @@ class GoodsController extends Controller
     }
 
 	/**
-	 * Генерируем код для результата фильтрации таблицы продуктов
+	 * Генерируем код для результата фильтрации таблицы номенклатуры на странице телефонного оператора
 	 * @param $text - искомая строка в базе
 	 * @param $tp - тип цены контрегента
 	 * @return string - возвращаем строку с html кодом
 	 */
     public function actionSearchGood($text, $tp)
     {
-        $goods = Goods::find()->select(['id' => 'good_id', 'name' => 'good_name', 'price' => 'good_price', 'desc' => 'good_description'])
-		    ->where(['ilike', 'good_name', "$text%", false])->andWhere(['typeprices_id' => $tp])
+        $goods = Goods::find()->select(['id' => 'good_id', 'good_1c_id' => 'goods.good_1c_id', 'good_detail_guid',
+                                        'name' => 'good_name', 'desc' => 'good_description', 'price' => 'good_price'])
+		    ->joinWith('currentNom', true, 'RIGHT JOIN')->where('guid_1c IS NOT NULL')
+	        ->andWhere(['ilike', 'good_name', "$text%", false])->andWhere(['typeprices_id' => $tp])
             ->orderBy('good_name')
 		    ->asArray()
 		    ->all();
+
+        //var_dump($goods); die;
 
     	$thtml = '';
     	if ($goods)
 	        foreach ($goods as $good){
 	            $thtml .= '<tr>'
-		                    .'<td>'. Html::a($good['name'], '#', ['class' => 'chain', 'id' => $good['id']]) .'</td>'
+		                    .'<td>'. Html::a($good['name'], '#', ['class' => 'chain', 'id' => 'a'.$good['id']]) .'</td>'
 							.'<td>'. $good['desc'] .'</td>'
 		                    .'<td>'. $good['price'] / 100 .'</td>'
 		                    .'<td>'. Html::input('number', 'count' . $good['id'], 0, ['class' => 'form-control count input-sm', 'id' => $good['id']]) .'</td>'

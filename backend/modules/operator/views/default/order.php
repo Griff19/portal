@@ -4,26 +4,51 @@
  */
 
 use backend\models\Basket;
+use backend\modules\operator\assets\DefaultAsset;
 use yii\grid\GridView;
 use yii\grid\Column;
 use yii\helpers\Html;
-use backend\modules\operator\assets\DefaultAsset;
+use yii\helpers\Url;
+use yii\bootstrap\Modal;
 
 /**
- * @var $customer   \backend\models\Customers
- * @var $goodData   \yii\data\ActiveDataProvider
- * @var $goodSearch \backend\models\GoodsSearch
+ * @var $customer         \backend\models\Customers
+ * @var $goodData         \yii\data\ActiveDataProvider
+ * @var $goodSearch       \backend\models\GoodsSearch
  * @var $typicalOrderData \yii\data\ActiveDataProvider
- * @var $basketData \yii\data\ActiveDataProvider
+ * @var $basketData       \yii\data\ActiveDataProvider
  */
 
-DefaultAsset::register($this);
 $this->title = "Заявка";
+DefaultAsset::register($this);
+// Обработка модального окна происходит в скрипте 'js\main.js'
+Modal::begin([
+    'header' => 'Следующий контрагент...',
+    'id' => 'modal',
+    //'size' => 'modal-lg'
+]);
+echo '<div id = "modalContent"></div>';
+Modal::end();
 
+$amount = Basket::getTotals('summ', $customer->customer_id);
+
+//var_dump($customer->placeOrder);
 ?>
 
 <!-- Javascript code -->
 <script type="text/javascript">
+    /** Идентификаторы элементов страницы */
+    /** @name txtRegStatus */
+    /** @name btnHangUp */
+    /** @name btnCall */
+    /** @name txtCallStatus */
+    /** @name divCallOptions */
+    /** @name btnHoldResume */
+    /** @name btnMute */
+    /** @name divCallCtrl */
+    /** @name btnRegister */
+    /** @name divKeyPad */
+    /** @name divGlassPanel */
 
     var oSipStack, oSipSessionRegister, oSipSessionCall, oSipSessionTransferCall;
     var videoRemote, videoLocal, audioRemote;
@@ -32,6 +57,7 @@ $this->title = "Заявка";
     var viewVideoLocal, viewVideoRemote;
     var oConfigCall;
     var oReadyStateTimer;
+    var amount = <?= $amount ?>;
 
     C = {divKeyPadWidth: 220};
 
@@ -67,13 +93,13 @@ $this->title = "Заявка";
 
         var preInit = function () {
             // set default webrtc type (before initialization)
-            var s_webrtc_type = getPVal("wt");
-            var s_fps = getPVal("fps");
-            var s_mvs = getPVal("mvs"); // maxVideoSize
-            var s_mbwu = getPVal("mbwu"); // maxBandwidthUp (kbps)
-            var s_mbwd = getPVal("mbwd"); // maxBandwidthUp (kbps)
-            var s_za = getPVal("za"); // ZeroArtifacts
-            var s_ndb = getPVal("ndb"); // NativeDebug
+            let s_webrtc_type = getPVal("wt");
+            let s_fps = getPVal("fps");
+            let s_mvs = getPVal("mvs"); // maxVideoSize
+            let s_mbwu = getPVal("mbwu"); // maxBandwidthUp (kbps)
+            let s_mbwd = getPVal("mbwd"); // maxBandwidthUp (kbps)
+            let s_za = getPVal("za"); // ZeroArtifacts
+            let s_ndb = getPVal("ndb"); // NativeDebug
 
             if (s_webrtc_type) SIPml.setWebRtcType(s_webrtc_type);
 
@@ -86,7 +112,7 @@ $this->title = "Заявка";
             if (s_mbwu) SIPml.setMaxBandwidthUp(parseFloat(s_mbwu));
             if (s_mbwd) SIPml.setMaxBandwidthDown(parseFloat(s_mbwd));
             if (s_za) SIPml.setZeroArtifacts(s_za === "true");
-            if (s_ndb == "true") SIPml.startNativeDebug();
+            if (s_ndb === "true") SIPml.startNativeDebug();
 
         }
 
@@ -110,19 +136,14 @@ $this->title = "Заявка";
                 if (confirm("You're using an old Chrome version or WebRTC is not enabled.\nDo you want to see how to enable WebRTC?")) {
                     window.location = 'http://www.webrtc.org/running-the-demos';
                 }
-                else {
-                    window.location = "index.html";
-                }
+                else {}
                 return;
             }
             else {
                 if (confirm("webrtc-everywhere extension is not installed. Do you want to install it?\nIMPORTANT: You must restart your browser after the installation.")) {
                     window.location = 'https://github.com/sarandogou/webrtc-everywhere';
                 }
-                else {
-                    // Must do nothing: give the user the chance to accept the extension
-                    // window.location = "index.html";
-                }
+                else {}
             }
         }
 
@@ -131,9 +152,7 @@ $this->title = "Заявка";
             if (confirm('Your browser don\'t support WebSockets.\nDo you want to download a WebSocket-capable browser?')) {
                 window.location = 'https://www.google.com/intl/en/chrome/browser/';
             }
-            else {
-                window.location = "index.html";
-            }
+            else { window.location = "index.html"; }
             return;
         }
 
@@ -166,20 +185,10 @@ $this->title = "Заявка";
 
     function loadCallOptions() {
         if (window.localStorage) {
-            //var s_value;
-            //if ((s_value = window.localStorage.getItem('org.doubango.call.phone_number'))) txtPhoneNumber.value = s_value;
             bDisableVideo = true;
             txtCallStatus.innerHTML = '<i>Video ' + (bDisableVideo ? 'disabled' : 'enabled') + '</i>';
         }
     }
-/*
-    function saveCallOptions() {
-        if (window.localStorage) {
-            window.localStorage.setItem('org.doubango.call.phone_number', txtPhoneNumber.value);
-            window.localStorage.setItem('ru.altburenka.portal.disable_video', bDisableVideo ? "true" : "false");
-        }
-    }
-*/
     // sends SIP REGISTER request to login
     function sipRegister() {
         // catch exception for IE (DOM not ready)
@@ -187,12 +196,11 @@ $this->title = "Заявка";
             btnRegister.disabled = true;
 
             // enable notifications if not already done
-            if (window.webkitNotifications && window.webkitNotifications.checkPermission() != 0) {
+            if (window.webkitNotifications && window.webkitNotifications.checkPermission() !== 0) {
                 window.webkitNotifications.requestPermission();
             }
-
             //
-            SIPml.setDebugLevel((window.localStorage && window.localStorage.getItem('ru.altburenka.portal.disable_debug') == "true") ? "error" : "info");
+            SIPml.setDebugLevel((window.localStorage && window.localStorage.getItem('ru.altburenka.portal.disable_debug') === "true") ? "error" : "info");
             //
             oSipStack = new SIPml.Stack({
                     realm: '192.168.0.18',
@@ -215,7 +223,7 @@ $this->title = "Заявка";
                     ]
                 }
             );
-            if (oSipStack.start() != 0) {
+            if (oSipStack.start() !== 0) {
                 txtRegStatus.innerHTML = '<b>Ошибка доступа к SIP-стеку</b>';
             }
             else return;
@@ -234,7 +242,7 @@ $this->title = "Заявка";
     // makes a call (SIP INVITE)
     function sipCall(s_type) {
         if (oSipStack && !oSipSessionCall && !tsk_string_is_null_or_empty(txtPhoneNumber.value)) {
-            if (s_type == 'call-screenshare') {
+            if (s_type === 'call-screenshare') {
                 alert('Screen sharing not supported. Are you using chrome 26+?');
                 return;
             }
@@ -265,11 +273,11 @@ $this->title = "Заявка";
     // holds or resumes the call
     function sipToggleHoldResume() {
         if (oSipSessionCall) {
-            var i_ret;
+            let i_ret;
             btnHoldResume.disabled = true;
             txtCallStatus.innerHTML = oSipSessionCall.bHeld ? '<i>Возобновление вызова...</i>' : '<i>Удержание вызова...</i>';
             i_ret = oSipSessionCall.bHeld ? oSipSessionCall.resume() : oSipSessionCall.hold();
-            if (i_ret != 0) {
+            if (i_ret !== 0) {
                 txtCallStatus.innerHTML = '<i>Удержание / Возобновление не удалось</i>';
                 btnHoldResume.disabled = false;
                 return;
@@ -279,11 +287,11 @@ $this->title = "Заявка";
     // Mute or Unmute the call
     function sipToggleMute() {
         if (oSipSessionCall) {
-            var i_ret;
-            var bMute = !oSipSessionCall.bMute;
+            let i_ret;
+            let bMute = !oSipSessionCall.bMute;
             txtCallStatus.innerHTML = bMute ? '<i>Заглушить микрофон...</i>' : '<i>Включить микрофон...</i>';
             i_ret = oSipSessionCall.mute('audio', bMute);
-            if (i_ret != 0) {
+            if (i_ret !== 0) {
                 txtCallStatus.innerHTML = '<i>Не удалось Заглушить / Включить микрофон</i>';
                 return;
             }
@@ -291,7 +299,6 @@ $this->title = "Заявка";
             btnMute.value = bMute ? "Включить" : "Заглушить";
         }
     }
-
     // terminates the call (SIP BYE or CANCEL)
     function sipHangUp() {
         if (oSipSessionCall) {
@@ -302,45 +309,31 @@ $this->title = "Заявка";
 
     function sipSendDTMF(c) {
         if (oSipSessionCall && c) {
-            if (oSipSessionCall.dtmf(c) == 0) {
-                try {
-                    dtmfTone.play();
-                } catch (e) {
-                }
+            if (oSipSessionCall.dtmf(c) === 0) {
+                try { dtmfTone.play(); }
+                catch (e) {}
             }
         }
     }
 
     function startRingTone() {
-        try {
-            ringtone.play();
-        }
-        catch (e) {
-        }
+        try { ringtone.play(); }
+        catch (e) {}
     }
 
     function stopRingTone() {
-        try {
-            ringtone.pause();
-        }
-        catch (e) {
-        }
+        try { ringtone.pause(); }
+        catch (e) {}
     }
 
     function startRingbackTone() {
-        try {
-            ringbacktone.play();
-        }
-        catch (e) {
-        }
+        try { ringbacktone.play(); }
+        catch (e) {}
     }
 
     function stopRingbackTone() {
-        try {
-            ringbacktone.pause();
-        }
-        catch (e) {
-        }
+        try { ringbacktone.pause(); }
+        catch (e) {}
     }
 
     function openKeyPad() {
@@ -434,7 +427,6 @@ $this->title = "Заявка";
             if (!oSipSessionCall) txtCallStatus.innerHTML = '';
         }, 2500);
     }
-
     // Callback function for SIP Stacks
     function onSipEventStack(e /*SIPml.Stack.Event*/) {
         tsk_utils_log_info('==stack event = ' + e.type);
@@ -465,7 +457,7 @@ $this->title = "Заявка";
             case 'stopped':
             case 'failed_to_start':
             case 'failed_to_stop': {
-                var bFailure = (e.type == 'failed_to_start') || (e.type == 'failed_to_stop');
+                let bFailure = (e.type === 'failed_to_start') || (e.type === 'failed_to_stop');
                 oSipStack = null;
                 oSipSessionRegister = null;
                 oSipSessionCall = null;
@@ -499,7 +491,7 @@ $this->title = "Заявка";
 
                     startRingTone();
 
-                    var sRemoteNumber = (oSipSessionCall.getRemoteFriendlyName() || 'unknown');
+                    let sRemoteNumber = (oSipSessionCall.getRemoteFriendlyName() || 'unknown');
                     txtCallStatus.innerHTML = "<i>Входящий вызов от [<b>" + sRemoteNumber + "</b>]</i>";
                     showNotifiCall(sRemoteNumber);
                 }
@@ -513,60 +505,78 @@ $this->title = "Заявка";
             case 'm_permission_accepted':
             case 'm_permission_refused': {
                 divGlassPanel.style.visibility = 'hidden';
-                if (e.type == 'm_permission_refused') {
+                if (e.type === 'm_permission_refused') {
                     uiCallTerminated('Media stream permission denied');
                 }
                 break;
             }
-
             case 'starting':
-            default:
-                break;
+            default: break;
         }
     }
 
     function addBasketOne(id) {
-        $.post('/basket/addone?id=' + id + '&mod=1', function(res) {
-            var res = JSON.parse(res);
+        $.post('/basket/addone?id=' + id + '&mod=1', function (res) {
+            res = JSON.parse(res);
+            amount = res[1];
             $('#basket > tbody').html(res[0]);
-            $('#summ').html(res[1]);
+            $('#summ').html(amount);
         });
     }
 
     function delBasketOne(id) {
-        $.post('/basket/deleteone?id=' + id + '&mod=1', function(res) {
-            var res = JSON.parse(res);
+        $.post('/basket/deleteone?id=' + id + '&mod=1', function (res) {
+            res = JSON.parse(res);
+            amount = res[1];
             $('#basket > tbody').html(res[0]);
-            $('#summ').html(res[1]);
+            $('#summ').html(amount);
         });
     }
-    
-    function createOrder(customer, amount) {
+    // Создаем заказ из набранной "Корзины". Заказ сразу "размещается" и выгружается в ближайшее время.
+    function createOrder(customer) {
+        if (amount <= <?= $customer->min_amount ?> || typeof(amount) === "undefined") {
+            alert("Сумма заказа не достаточна для данного контрагента, дополните заказ.");
+            return false;
+        }
         $.post('/orders/create-from-basket?customer_id=' + customer + '&amount=' + amount, function (res) {
             $('#alert').addClass('alert alert-success fade in');
             $('#alert').html(res);
+            $('.btn-xs').prop('disabled', true);
         })
     }
-
+    // Проверяем можно ли перейти к следующему контрагенту или нужно вывести окно с причиной перехода
+    function checkCustomer(customer) {
+        $.post('check-customer?customer_id=' + customer, function (res) {
+            if (res) location.href = 'next-customer';
+            else buttClick('modal?customer_id=' + customer);
+        });
+    }
+    // Прокрутка окна во время перехода по строкам таблицы с помощью стрелок вверх и вниз
     function scrollToElement(theElement) {
         //var destination = $(theElement).offset().top;
-        var destination = theElement.offset().top - 500;
-        $('html').animate({ scrollTop: destination }, 10);
+        let destination = theElement.offset().top;
+        let windowTop = $(window).scrollTop();
+        let windowHeight = $(window).height();
+        //console.log(destination, windowTop + windowHeight);
+        if (destination >= windowTop + windowHeight - 100)
+            $('html').animate({scrollTop: windowTop + 100}, 100)
+        else if (destination <= windowTop + 100)
+            $('html').animate({scrollTop: destination - 100}, 100)
     }
-
     // Callback function for SIP sessions (INVITE, REGISTER, MESSAGE...)
-    function onSipEventSession(e /* SIPml.Session.Event */) {
+    function onSipEventSession(e) {
+
         tsk_utils_log_info('==session event = ' + e.type);
 
         switch (e.type) {
             case 'connecting':
             case 'connected': {
-                var bConnected = (e.type == 'connected');
-                if (e.session == oSipSessionRegister) {
+                let bConnected = (e.type === 'connected');
+                if (e.session === oSipSessionRegister) {
                     uiOnConnectionEvent(bConnected, !bConnected);
                     txtRegStatus.innerHTML = "<i>" + e.description + "</i>";
                 }
-                else if (e.session == oSipSessionCall) {
+                else if (e.session === oSipSessionCall) {
                     btnHangUp.value = 'HangUp';
                     btnCall.disabled = true;
                     btnHangUp.disabled = false;
@@ -576,69 +586,59 @@ $this->title = "Заявка";
                     if (bConnected) {
                         stopRingbackTone();
                         stopRingTone();
-
                         if (oNotifICall) {
                             oNotifICall.cancel();
                             oNotifICall = null;
                         }
                     }
-
                     txtCallStatus.innerHTML = "<i>" + e.description + "</i>";
                     divCallOptions.style.opacity = bConnected ? 1 : 0;
-
                 }
                 break;
             } // 'connecting' | 'connected'
             case 'terminating':
             case 'terminated': {
-                if (e.session == oSipSessionRegister) {
+                if (e.session === oSipSessionRegister) {
                     uiOnConnectionEvent(false, false);
-
                     oSipSessionCall = null;
                     oSipSessionRegister = null;
-
                     txtRegStatus.innerHTML = "<i>" + e.description + "</i>";
                 }
-                else if (e.session == oSipSessionCall) {
+                else if (e.session === oSipSessionCall) {
                     uiCallTerminated(e.description);
                 }
                 break;
             } // 'terminating' | 'terminated'
-
             case 'm_stream_audio_local_added':
             case 'm_stream_audio_local_removed':
             case 'm_stream_audio_remote_added':
             case 'm_stream_audio_remote_removed': {
                 break;
             }
-
             case 'i_ect_new_call': {
                 oSipSessionTransferCall = e.session;
                 break;
             }
-
             case 'i_ao_request': {
-                if (e.session == oSipSessionCall) {
-                    var iSipResponseCode = e.getSipResponseCode();
-                    if (iSipResponseCode == 180 || iSipResponseCode == 183) {
+                if (e.session === oSipSessionCall) {
+                    let iSipResponseCode = e.getSipResponseCode();
+                    if (iSipResponseCode === 180 || iSipResponseCode === 183) {
                         startRingbackTone();
                         txtCallStatus.innerHTML = '<i>Remote ringing...</i>';
                     }
                 }
                 break;
             }
-
             case 'm_early_media': {
-                if (e.session == oSipSessionCall) {
+                if (e.session === oSipSessionCall) {
                     stopRingbackTone();
                     stopRingTone();
                     txtCallStatus.innerHTML = '<i>Early media started</i>';
                 }
                 break;
             }
-
             case 'm_local_hold_ok': {
-                if (e.session == oSipSessionCall) {
+                if (e.session === oSipSessionCall) {
                     if (oSipSessionCall.bTransfering) {
                         oSipSessionCall.bTransfering = false;
                         // this.AVSession.TransferCall(this.transferUri);
@@ -651,7 +651,7 @@ $this->title = "Заявка";
                 break;
             }
             case 'm_local_hold_nok': {
-                if (e.session == oSipSessionCall) {
+                if (e.session === oSipSessionCall) {
                     oSipSessionCall.bTransfering = false;
                     btnHoldResume.value = 'Hold';
                     btnHoldResume.disabled = false;
@@ -660,7 +660,7 @@ $this->title = "Заявка";
                 break;
             }
             case 'm_local_resume_ok': {
-                if (e.session == oSipSessionCall) {
+                if (e.session === oSipSessionCall) {
                     oSipSessionCall.bTransfering = false;
                     btnHoldResume.value = 'Hold';
                     btnHoldResume.disabled = false;
@@ -670,7 +670,7 @@ $this->title = "Заявка";
                 break;
             }
             case 'm_local_resume_nok': {
-                if (e.session == oSipSessionCall) {
+                if (e.session === oSipSessionCall) {
                     oSipSessionCall.bTransfering = false;
                     btnHoldResume.disabled = false;
                     txtCallStatus.innerHTML = '<i>Failed to unhold call</i>';
@@ -678,19 +678,19 @@ $this->title = "Заявка";
                 break;
             }
             case 'm_remote_hold': {
-                if (e.session == oSipSessionCall) {
+                if (e.session === oSipSessionCall) {
                     txtCallStatus.innerHTML = '<i>Placed on hold by remote party</i>';
                 }
                 break;
             }
             case 'm_remote_resume': {
-                if (e.session == oSipSessionCall) {
+                if (e.session === oSipSessionCall) {
                     txtCallStatus.innerHTML = '<i>Taken off hold by remote party</i>';
                 }
                 break;
             }
             case 'm_bfcp_info': {
-                if (e.session == oSipSessionCall) {
+                if (e.session === oSipSessionCall) {
                     txtCallStatus.innerHTML = 'BFCP Info: <i>' + e.description + '</i>';
                 }
                 break;
@@ -704,62 +704,62 @@ $this->title = "Заявка";
         <div id="alert"></div>
         <h4>Типичная заявка:</h4>
         <?= GridView::widget([
-            'tableOptions' => ['id' => 'typicalOrder', 'class' => 'table table-bordered table-nopadding'],
-            'dataProvider' => $typicalOrderData,
-            'layout'=>"{items}",
-            'columns' => [
-                'good_id',
-                'good.good_name',
-                'count',
-                ['class' => Column::className(),
-                    'header' => 'Повторить',
-                    'content' => function($model){
-                        return Html::a('<span class="glyphicon glyphicon-ok"></span>', '#', [
-                                'class' => 'addBasket',
-                                'data-customer' => $model->customer_id,
-                                'data-good' => $model->good_hash,
-                                'data-count' => $model->count
-                            ]);
-                    },
-                    'contentOptions' => ['style' => 'text-align: center']
-                ]
-            ]
-        ]); ?>
+			'tableOptions' => ['id' => 'typicalOrder', 'class' => 'table table-bordered table-nopadding'],
+			'dataProvider' => $typicalOrderData,
+			'layout' => "{items}",
+			'columns' => [
+				'good_id',
+				'good.good_name',
+				'count',
+				[
+					'class' => Column::className(),
+					'header' => 'Повторить',
+					'content' => function ($model) {
+						return Html::a('<span class="glyphicon glyphicon-ok"></span>', '#', [
+							'class'         => 'addBasket',
+							'data-customer' => $model->customer_id,
+							'data-good'     => $model->good_hash,
+							'data-count'    => $model->count
+						]);
+					},
+					'contentOptions' => ['style' => 'text-align: center']
+				]
+			]
+		]); ?>
 
         <h4>Набираемый заказ:</h4>
-	    <?= GridView::widget([
-            'tableOptions' => ['id' => 'basket', 'class' => 'table table-bordered table-nopadding'],
-		    'layout' => '{items}',
-		    'dataProvider' => $basketData,
-            'columns' => [
-                'id',
-                'user_id',
-                'goods.good_name',
-                ['attribute' => 'count',
-                    'value' => function($model) {
-	                    return $model->count
-	                    . Html::a('+', 'javascript:void(0);', ['class' => 'btn btn-xs btn-primary', 'onclick' => "addBasketOne($model->id)",
-                                             'style' => 'float:right;'])
-                        . Html::a('-', 'javascript:void(0);', ['class' => 'btn btn-xs btn-primary', 'onclick' => "delBasketOne($model->id)",
-                                             'style' => 'float:right; padding: 1px 7px 1px 7px;']);
-	                },
-                    'format' => 'raw'
-                ],
-                ['attribute' => 'summ',
-                    'value' => function($model){return $model->summ / 100;}
-                ]
-            ],
-	    ])?>
+		<?= GridView::widget([
+			'tableOptions' => ['id' => 'basket', 'class' => 'table table-bordered table-nopadding'],
+			'layout'       => '{items}',
+			'dataProvider' => $basketData,
+			'columns'      => [
+				'id',
+				'user_id',
+				'goods.good_name',
+				[
+					'attribute' => 'count',
+					'value'     => function ($model) {
+						return $model->count . Html::a('+', 'javascript:void(0);', [
+						        'class'   => 'btn btn-xs btn-primary',
+								'onclick' => "addBasketOne($model->id)",
+								'style'   => 'float:right;'
+							]) . Html::a('-', 'javascript:void(0);', [
+							        'class'   => 'btn btn-xs btn-primary',
+									'onclick' => "delBasketOne($model->id)",
+									'style'   => 'float:right; padding: 1px 7px 1px 7px;'
+							]);
+					},
+					'format'    => 'raw'
+				],
+				['attribute' => 'summ', 'value' => function ($model) { return $model->summ / 100; }]
+			],
+		]) ?>
         <p style="float:right">
-            <?php $amount = Basket::getTotals('summ', $customer->customer_id); ?>
             <b>Сумма:<span id="summ"><?= $amount; ?></span>р.</b>
-            <?= Html::a('Очистить', 'javascript:void(0)', ['id' => 'basketAllDel', 'class' => 'btn btn-danger']);?>
-            <?= Html::a('Принять', '#', ['class' => 'btn btn-success',
-                'onclick' => "createOrder($customer->customer_id)"
-            ]);?>
+			<?= Html::a('Очистить', 'javascript:void(0)', ['id' => 'basketAllDel', 'class' => 'btn btn-danger']); ?>
+			<?= Html::a('Принять', '#', ['class' => 'btn btn-success', 'onclick' => "createOrder($customer->customer_id, amount)"]); ?>
         </p>
     </div>
-
     <div class="col-md-4">
         <div id="divCallCtrl" class="span3 well" style='display:table-cell; vertical-align:middle'>
             <label style="width: 100%;" align="center" id="txtRegStatus">
@@ -770,7 +770,8 @@ $this->title = "Заявка";
             <p>Ответственный: <b><?= $customer->directResponsible ?></b></p>
             <br/>
             <h4>8 <?= $customer->directPhone ?></h4>
-            <input type="text" style="width: 100%; height:100%;" id="txtPhoneNumber" value="8<?= $customer->directPhone ?>" />
+            <input type="text" style="width: 100%; height:100%;" id="txtPhoneNumber"
+                   value="8<?= $customer->directPhone ?>"/>
 
             <div style="text-align: center">
                 <input type="button" class="btn btn-success" id="btnRegister" value="LogIn" disabled
@@ -778,12 +779,12 @@ $this->title = "Заявка";
                 <input type="button" class="btn btn-primary" id="btnCall" value="Вызов" disabled
                        onclick='sipCall("call-audio");'/>
                 <input type="button" class="btn btn-primary" id="btnHangUp" value="Прервать" disabled
-                       onclick='sipHangUp();' />
+                       onclick='sipHangUp();'/>
                 <input type="button" class="btn btn-danger" id="btnUnRegister" value="LogOut" disabled
                        onclick='sipUnRegister();'/>
             </div>
 
-            <div id='divCallOptions' class='call-options' style="opacity: 1; margin-top: 0px; text-align: center;">
+            <div id='divCallOptions' class='call-options' style="opacity: 0; margin-top: 0px; text-align: center;">
                 <input type="button" class="btn btn-default" style="" id="btnMute" value="Заглушить"
                        onclick='sipToggleMute();'/> &nbsp;
                 <input type="button" class="btn btn-default" style="" id="btnHoldResume" value="Удержание"
@@ -815,9 +816,11 @@ $this->title = "Заявка";
                        data-toggle="collapse" data-target="#divKeyPad"/>
             </div>
         </div>
+		<?= Html::a('Следующий >>>', 'javascript:void(0)', ['class' => 'btn btn-primary', 'data-confirm' => 'Перейти к следующему контрагенту?',
+            'onclick' => "checkCustomer($customer->customer_id)"
+            ]) ?>
     </div>
 </div>
-
 <div class="row">
     <div class="col-md-12">
         <h4>Номенклаура:</h4>
@@ -825,36 +828,35 @@ $this->title = "Заявка";
 			'tableOptions' => ['id' => 'goods', 'class' => 'table table-bordered table-nopadding'],
 			'dataProvider' => $goodData,
 			'filterModel'  => $goodSearch,
-			'layout' => '{items}',
+			'layout'       => '{items}',
 			'columns'      => [
-                ['attribute'          => 'good_name',
-				 'value'              => function ($model) {
-					 return Html::a($model->good_name, '#');
-				 },
-				 'format'             => 'raw',
-				 'filterInputOptions' => ['id' => 'search', 'class' => 'form-control', 'autocomplete' => 'off']
+				[
+					'attribute'          => 'good_name',
+					'value'              => function ($model) {
+						return Html::a($model->good_name, '#');
+					},
+					'format'             => 'raw',
+					'filterInputOptions' => ['id' => 'search', 'class' => 'form-control', 'autocomplete' => 'off']
 				],
 				'good_description',
-                ['attribute' => 'good_price',
-                    'value' => function($model){return $model->good_price / 100;}
-                ],
-				['class'   => Column::className(),
-				 'header'  => 'Количество',
-				 'content' => function ($model) {
-					 return Html::input('number', 'count' . $model->good_id, 0, [
-						 'class' => 'form-control count input-sm', 'id' => $model->good_id
-					 ]);
-				 },
-				 'options' => ['style' => 'width:10px']
+				['attribute' => 'good_price', 'value' => function ($model) { return $model->good_price / 100; }],
+				[
+					'class'   => Column::className(),
+					'header'  => 'Количество',
+					'content' => function ($model) {
+						return Html::input('number', 'count' . $model->good_id, 0, [
+							'class' => 'form-control count input-sm',
+							'id'    => $model->good_id
+						]);
+					},
+					'options' => ['style' => 'width:10px']
 				],
-			]]);
-		?>
+			]
+		]); ?>
     </div>
-
 </div>
 <object id="fakePluginInstance" classid="clsid:69E4A9D1-824C-40DA-9680-C7424A27B6A0"
         style="visibility:hidden;"></object>
-<!-- Glass Panel -->
 <div id='divGlassPanel' class='glass-panel' style='visibility:visible'></div>
 
 <?php
@@ -892,18 +894,22 @@ $script = <<<JS
     $('#goods > tbody').on('keydown', function(e) {
         if (e.target.nodeName !== "INPUT"){ 
             len = $('#goods > tbody > tr').length - 1;
+            flag = false;
             if (e.keyCode === 40) {
                 if (idx < len) idx += 1; 
                 else idx = len;
+                flag = true;
             } else if (e.keyCode === 38) {
                 if (idx > 0) idx -= 1;
                 else idx = 0;
+                flag = true;
             } 
-            var elem = $('.chain').eq(idx);
+            let elem = $('.chain').eq(idx);
             elem.focus();
             scrollToElement(elem);
-            console.log(elem.attr('id'));
-            $('#goods > tbody > tr').eq(idx).addClass('success').siblings().removeClass('success');            
+            //console.log(elem.attr('id'));
+            $('#goods > tbody > tr').eq(idx).addClass('success').siblings().removeClass('success'); 
+            if (flag) return false; // Если была нажата клавиша вверх или вниз, то прерываем стандартную обработку
         }
     });
     // Для возобновления поиска просто начинаем вводить новую строку, произойдет переход в поле ввода
@@ -911,42 +917,45 @@ $script = <<<JS
     // при нажатии клавиши "enter" происходит переход к следующей строке
     $('#goods > tbody').on('keypress', function(e) {
         if (e.keyCode === 13) {
-            console.log(e.target.id);
-            var c = $('#'+e.target.id).val();
+            //console.log(e.target.id);
+            let c = $('#'+e.target.id).val();
             $.post('/basket/insert?customer_id='+ customer +
                 '&good_id='+ e.target.id + 
                 '&count=' + c, function(res) {
-                    var res = JSON.parse(res);
+                    res = JSON.parse(res);
+                    amount = res[1];
                     $('#basket > tbody').html(res[0]);
-                    $('#summ').html(res[1]);
+                    $('#summ').html(amount);
             });
+            // Чтобы дать пользователю знак что позиция добавлена, отмечаем жирным, только что обработанную строку 
+            // и переводим фокус на следующую
+            $('#goods > tbody > tr').eq(idx).css('font-weight', 600);
             idx += 1; 
             $('.chain').eq(idx).focus();
-            $('#goods > tbody > tr').eq(idx).addClass('success').siblings().removeClass('success');
-            
-            return true
-        }        
-        
-        if (e.which != 0 && e.charCode != 0) { // все кроме IE
-            if (!e.which < 32) // спец. символ
-                var c = String.fromCharCode(e.which); // остальные
+            $('#goods > tbody > tr').eq(idx).addClass('success').siblings().removeClass('success');            
+        } else {      
+            if (e.which != 0 && e.charCode != 0) { // все кроме IE
+                if (!e.which < 32) // спец. символ
+                    var c = String.fromCharCode(e.which); // остальные
+            }
+            if (isNaN(parseInt(c))) {
+                $('#search').focus();
+                //$('#search').val(c);
+            } else {
+                if (e.target.nodeName !== "INPUT")
+                    $('.count').eq(idx).select();              
+            }
         }
-        if (isNaN(parseInt(c))) {
-            $('#search').focus();
-            //$('#search').val(c);
-        } else {
-            if (e.target.nodeName !== "INPUT")
-                $('.count').eq(idx).select();              
-        }        
     }); 
     // Добавляем данные в заказ из таблицы "Типичная заявка"
     $('.addBasket').on('click', function(){
         $.post('/basket/insert?customer_id='+ $(this).data('customer') +
             '&good_hash='+ $(this).data('good') + 
             '&count=' + $(this).data('count'), function(res) {
-                var res = JSON.parse(res);
+                res = JSON.parse(res);
+                amount = res[1];
                 $('#basket > tbody').html(res[0]);
-                $('#summ').html(res[1]);
+                $('#summ').html(amount);
         });
     }); 
     // Очищаем всю корзину
@@ -955,8 +964,9 @@ $script = <<<JS
         $.post('/basket/deleteall?customer_id=' + customer, function() {
             $('#basket > tbody').html('<tr><td colspan="5">Ничего не найдено.</td></tr>');
             $('#summ').html('0');
+            amount = 0;
         })  
-    })
+    });
 JS;
 
 $this->registerJs($script);

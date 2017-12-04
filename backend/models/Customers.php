@@ -11,15 +11,23 @@ namespace backend\models;
  * @property string customer_name
  * @property string customer_email
  * @property integer typeprices_id
- * @property Orders[] $orders
  * @property string inn
+ * @property integer min_amount
  * @property string directPhone
  * @property string directResponsible
+ * @property integer sort
  * @property TypicalOrder typicalOrder
+ * @property Orders[] $orders
+ * @property Orders[] $placeOrder
  */
 class Customers extends \yii\db\ActiveRecord
 {
-    const ACCOUNT_ACTIVATE = 'activate';
+	const ACCOUNT_ACTIVATE = 'activate'; //Сценарий
+	const STATUS_DISABLE = 0; //не активный
+	const STATUS_ACTIVE = 1; //активный
+	const STATUS_CALL = 2; //работает оператор
+	const STATUS_DELAY = 3; //ожидает
+
     public $file;
     public $capch;
     /**
@@ -37,7 +45,7 @@ class Customers extends \yii\db\ActiveRecord
     {
         return [
             [['customer_1c_id','customer_name'], 'required'],
-            [['user_id','typeprices_id'], 'integer'],
+            [['user_id','typeprices_id', 'min_amount'], 'integer'],
             [['customer_name'], 'string', 'max' => 200],
             ['customer_email', 'email'],
             ['customer_1c_id','string','max' => 10],
@@ -70,7 +78,8 @@ class Customers extends \yii\db\ActiveRecord
             'inn' => 'ИНН',
             'capch' => 'Каптча:',
 	        'directPhone' => 'Телефон',
-	        'directResponsible' => 'Ответственный'
+	        'directResponsible' => 'Ответственный',
+			'min_amount' => 'Минимальная сумма'
         ];
     }
 
@@ -100,25 +109,35 @@ class Customers extends \yii\db\ActiveRecord
     }
 
     /**
+	 * Связываем с моделью "Заказы"
      * @return \yii\db\ActiveQuery
      */
     public function getOrders()
     {
         return $this->hasMany(Orders::className(), ['customers_customer_id' => 'customer_id']);
     }
-    /**
-     * Получаем массив идентификаторов типов цен
-     * @param integer $user_id
-     * @return Array
-     */
+	
+	/**
+	 * Ищем сохраненный и размещенный заказ для контрагента
+	 * @return \yii\db\ActiveQuery
+	 */
+    public function getPlaceOrder()
+	{
+		return Orders::find()->where(['customers_customer_id' => $this->customer_id])->andWhere(['status' => Orders::STATUS_PLACE]);
+	}
+	
+	/**
+	 * Получаем массив идентификаторов типов цен
+	 *
+	 * @param integer $user_id
+	 * @return array
+	 */
     public function getTP($user_id)
     {
         $custom = $this->find()->where(['user_id' => $user_id])->all();
         foreach ($custom as $tp){
             $arr[] = $tp->typeprices_id;
         }
-        //print_r($arr);
-        //die();
         return $arr;
     }
     
