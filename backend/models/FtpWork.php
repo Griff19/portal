@@ -42,7 +42,7 @@ class FtpWork
             return false;
         }
         $login_result = ftp_login($conn_id, $this->username, $this->pass);
-        Logs::add('Авторизации на ftp: ' . $login_result);
+        Logs::add('Авторизации на ftp: ' . ($login_result ? 'Успешно.' : 'Не удалась...'));
         ftp_pasv($conn_id, true);
 
         $dir = dirname($server_file); //Получаем имя каталога

@@ -64,12 +64,13 @@ class CustomersController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
-
-    /**
-     * Displays a single Customers model.
-     * @param integer $id
-     * @return mixed
-     */
+	
+	/**
+	 * Displays a single Customers model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException
+	 */
     public function actionView($id)
     {
         $queryParams = Yii::$app->request->queryParams;
@@ -113,7 +114,7 @@ class CustomersController extends Controller
     }
 
     /**
-     *
+     * Разбираем файл и заносим в базу
      */
     public function read_file() {
         /* @var $customer Customers */
@@ -122,7 +123,7 @@ class CustomersController extends Controller
         $readfile = fopen($filename, 'r');
         while ($str = fgets($readfile, 1024)){
             $items = explode(';', $str); //имя пользователя[0]; код контрагента[1]; имя контрагента[2]; тип цен[3]; ИНН[4]; email[5]
-            $usr = User::findByFullname($items[0]);
+            
             $tpname = substr($items[3],0,9);
             if (empty($tpname))
                 $tp = Typeprice::findOne(['type_price_name' => '00001    ']);
@@ -154,51 +155,6 @@ class CustomersController extends Controller
         fclose($readfile);
     }
 
-    /**
-     * Достаем данные из файла
-     */
-    public function readfile(){
-        $filename = 'CustomersFile/Customers.txt';
-        $readfile = fopen($filename, 'r');
-        while ($str = fgets($readfile, 1024)){
-            //echo 'BEGIN <br>';
-            $items = explode(';', $str); //имя пользователя[0]; код контрагента[1]; имя контрагента[2]; тип цен[3]; ИНН[4]; email[5]
-            //print_r($items);
-            //die();
-            $usr = User::findByFullname($items[0]);
-            //var_dump($usr);
-            if(!isset($usr)) {continue;}
-
-            $tpname = substr($items[3],0,9);
-            if (empty(trim($tpname))){continue;}
-            $tp = Typeprice::findOne(['type_price_name' => $tpname]);
-            if(isset($tp)){
-                //print_r($tp);
-                //echo $tp->type_price_id . '<br>';
-            } else {
-                //echo 'new TP <br>';
-                $tp = new Typeprice();
-                $tp->type_price_name = $tpname;
-                $tp->save();
-            }
-            //continue;
-            $customer = Customers::findOne(['customer_1c_id' => $items[1]]);
-            if(isset($customer)){
-                //echo $customer->customer_id;
-            } else {
-                //echo 'new CS <br>';
-                $customer = new Customers();
-                $customer->customer_1c_id = $items[1];
-                $customer->user_id = $usr->id;
-                $customer->customer_name = $items[2];
-                $customer->typeprices_id = $tp->type_price_id;
-                $customer->save();               
-            }
-            unset($customer);
-            unset($tp);                  
-        }
-        fclose($readfile);
-    }
     //загружаем файл с данными по контрагентам
     public function actionUploadform(){
         $model = new Customers();
@@ -237,13 +193,14 @@ class CustomersController extends Controller
         $this->read_file();
         return $this->redirect(['index']);
     }
-
-    /**
-     * Updates an existing Customers model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     */
+	
+	/**
+	 * Updates an existing Customers model.
+	 * If update is successful, the browser will be redirected to the 'view' page.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException
+	 */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
@@ -257,13 +214,16 @@ class CustomersController extends Controller
             ]);
         }
     }
-
-    /**
-     * Deletes an existing Customers model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     */
+	
+	/**
+	 * Deletes an existing Customers model.
+	 * If deletion is successful, the browser will be redirected to the 'index' page.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException
+	 * @throws \Exception
+	 * @throws \yii\db\StaleObjectException
+	 */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
