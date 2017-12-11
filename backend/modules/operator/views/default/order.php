@@ -58,6 +58,7 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
     var oConfigCall;
     var oReadyStateTimer;
     var amount = <?= $amount ?>;
+    var currentPhone = <?= $customer->directPhone ?> + '';
 
     C = {divKeyPadWidth: 220};
 
@@ -71,7 +72,7 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
         divCallCtrl.onmousemove = onDivCallCtrlMouseMove;
 
         // set debug level
-        SIPml.setDebugLevel((window.localStorage && window.localStorage.getItem('ru.altburenka.portal.disable_debug') == "true") ? "error" : "info");
+        SIPml.setDebugLevel((window.localStorage && window.localStorage.getItem('ru.altburenka.portal.disable_debug') === "true") ? "error" : "info");
 
         //loadCredentials();
         loadCallOptions();
@@ -89,7 +90,7 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
                 }
             }
             return null;
-        }
+        };
 
         var preInit = function () {
             // set default webrtc type (before initialization)
@@ -114,7 +115,7 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
             if (s_za) SIPml.setZeroArtifacts(s_za === "true");
             if (s_ndb === "true") SIPml.startNativeDebug();
 
-        }
+        };
 
         oReadyStateTimer = setInterval(function () {
                 if (document.readyState === "complete") {
@@ -132,7 +133,7 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
         // check for WebRTC support
         if (!SIPml.isWebRtcSupported()) {
             // is it chrome?
-            if (SIPml.getNavigatorFriendlyName() == 'chrome') {
+            if (SIPml.getNavigatorFriendlyName() === 'chrome') {
                 if (confirm("You're using an old Chrome version or WebRTC is not enabled.\nDo you want to see how to enable WebRTC?")) {
                     window.location = 'http://www.webrtc.org/running-the-demos';
                 }
@@ -156,7 +157,6 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
             return;
         }
 
-        // FIXME: displays must be per session
         viewVideoLocal = videoLocal;
         viewVideoRemote = videoRemote;
 
@@ -440,7 +440,7 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
                         events_listener: {events: '*', listener: onSipEventSession},
                         sip_caps: [
                             {name: '+g.oma.sip-im', value: null},
-                            //{ name: '+sip.ice' }, // rfc5768: FIXME doesn't work with Polycom TelePresence
+                            //{ name: '+sip.ice' },
                             {name: '+audio', value: null},
                             {name: 'language', value: '\"en,fr\"'}
                         ]
@@ -769,19 +769,15 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
             <h4><?= $customer->customer_name ?></h4>
             <p>Ответственный: <b><?= $customer->directResponsible ?></b></p>
             <br/>
-            <h4>8 <?= $customer->directPhone ?></h4>
-            <input type="text" style="width: 100%; height:100%;" id="txtPhoneNumber"
-                   value="8<?= $customer->directPhone ?>"/>
+            <p>Добавить код:<input type="text" id="phoneCod" class="form-inline" style="border-radius: 4px; border-width: 1px; line-height: 25px;"></p>
+            <h4 id="txtCurrentPhone">8 <?= $customer->directPhone ?></h4>
+            <input type="hidden" id="txtPhoneNumber" class="form-control" value="8<?= $customer->directPhone ?>" />
 
             <div style="text-align: center">
-                <input type="button" class="btn btn-success" id="btnRegister" value="LogIn" disabled
-                       onclick='sipRegister();'/>
-                <input type="button" class="btn btn-primary" id="btnCall" value="Вызов" disabled
-                       onclick='sipCall("call-audio");'/>
-                <input type="button" class="btn btn-primary" id="btnHangUp" value="Прервать" disabled
-                       onclick='sipHangUp();'/>
-                <input type="button" class="btn btn-danger" id="btnUnRegister" value="LogOut" disabled
-                       onclick='sipUnRegister();'/>
+                <input type="button" class="btn btn-success" id="btnRegister" value="LogIn" onclick='sipRegister();' disabled />
+                <input type="button" class="btn btn-primary" id="btnCall" value="Вызов" onclick='sipCall("call-audio");' disabled />
+                <input type="button" class="btn btn-primary" id="btnHangUp" value="Прервать" onclick='sipHangUp();' disabled />
+                <input type="button" class="btn btn-danger" id="btnUnRegister" value="LogOut" onclick='sipUnRegister();' disabled />
             </div>
 
             <div id='divCallOptions' class='call-options' style="opacity: 0; margin-top: 0px; text-align: center;">
@@ -967,6 +963,23 @@ $script = <<<JS
             amount = 0;
         })  
     });
+    var kd;
+    // Ввод телефонного кода города если в базе не забит
+    $('#phoneCod').keydown(function(e){
+        console.log(phoneCod.value.length, currentPhone.length, kd);
+        if (e.keyCode !== 8){
+            if(phoneCod.value.length >= (10 - currentPhone.length)){
+                kd = false;            
+                return false;
+            } else {kd = true;}
+        } else {kd = true;}
+    });
+    $('#phoneCod').keyup(function(){        
+        if (kd) {
+            $('#txtCurrentPhone').html('8 (' + phoneCod.value + ')' + currentPhone); 
+            txtPhoneNumber.value = '8' + phoneCod.value + '' + currentPhone;
+        }
+    });    
 JS;
 
 $this->registerJs($script);

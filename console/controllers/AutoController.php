@@ -61,7 +61,7 @@ class AutoController extends Controller
 				}
 			}
 		}
-		echo "Актуальная номенклатура обработана.\r\n";
+		echo "Файл Актуальная номенклатура обработана.\r\n";
 	}
 	
 	/**
@@ -101,16 +101,21 @@ class AutoController extends Controller
 				$customer->typeprices_id = $tp->type_price_id;
 				$customer->save();
 			}
-			$items[6] = preg_replace('/[^0-9]/u', '', $items[6]);
-			$phone = Phone::findOne(['phone' => $items[6]]);
-			if ($phone){}
-			else {
-				$phone = new Phone();
-				$phone->customer_id = $customer->customer_id;
-				$phone->phone = $items[6];
-				$phone->sort = 1;
-				$phone->save();
-			}
+			$numbers = explode(',', $items[6]);
+			foreach ($numbers as $number) {
+			    echo $number;
+                $number = preg_replace('/(^8)|(^\(8)|[^0-9]/u', '', trim($number));
+                echo '->' .$number. "\n\r";
+                $phone = Phone::findOne(['phone' => $number]);
+                if ($phone) {
+                } else {
+                    $phone = new Phone();
+                    $phone->customer_id = $customer->customer_id;
+                    $phone->phone = $number;
+                    $phone->sort = 1;
+                    $phone->save();
+                }
+            }
 		}
 		echo "файл Контрагенты обработан.\n\r";
 	}
@@ -149,7 +154,7 @@ class AutoController extends Controller
 				echo $items[0] . " контрагент не найден.\n\r";
 			}
 		}
-		echo 'Файл с "Представителями" обработан.';
+		echo "Файл Представителей обработан.\n\r";
 	}
 
 	/**
@@ -157,7 +162,7 @@ class AutoController extends Controller
 	 */
 	public function actionDownloadAndParse(){
 		self::downloadFiles();
-		self::parseCurrentNom();
+		//self::parseCurrentNom();
 		self::parseCustomers();
 		self::parseResponsible();
 	}
