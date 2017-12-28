@@ -162,9 +162,9 @@ class AutoController extends Controller
 			}
 			$numbers = explode(',', $items[6]);
 			foreach ($numbers as $number) {
-			    echo $number;
+			    //echo $number;
                 $number = preg_replace('/(^8)|(^\(8)|[^0-9]/u', '', trim($number));
-                echo '->' .$number. "\n\r";
+                //echo '->' .$number. "\n\r";
                 $phone = Phone::findOne(['phone' => $number]);
                 if ($phone) {
                 } else {
@@ -221,9 +221,9 @@ class AutoController extends Controller
 	 */
 	public function actionDownloadAndParse(){
 		self::downloadFiles();
+        self::parseCustomers();
 		self::parseCurrentNom();
 		self::parseGoods();
-		self::parseCustomers();
 		self::parseResponsible();
 	}
 }
