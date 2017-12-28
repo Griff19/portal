@@ -222,8 +222,8 @@ class AutoController extends Controller
 	public function actionDownloadAndParse(){
 		self::downloadFiles();
 		self::parseCurrentNom();
-		//self::parseGoods();
-		//self::parseCustomers();
-		//self::parseResponsible();
+		self::parseGoods();
+		self::parseCustomers();
+		self::parseResponsible();
 	}
 }
