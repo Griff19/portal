@@ -83,6 +83,7 @@ class OrdersController extends Controller
      * Открываем один заказ
      * @param integer $id
      * @return mixed
+     * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
@@ -144,7 +145,7 @@ class OrdersController extends Controller
         $model->status = Orders::STATUS_CREATE;
         $model->order_date = date('Y-m-d', strtotime("now +1 day"));
         $model->save();
-
+        return 'true';
         Logs::add('Создан заказ: ' . $model->order_id . ' на сумму: ' . $amount);
 
 	    $str = "Заказ №$model->order_id на сумму {$amount}р.";
