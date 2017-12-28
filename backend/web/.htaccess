@@ -1,17 +1,11 @@
 Options +FollowSymLinks
-IndexIgnore */*
+#IndexIgnore */*
 
 RewriteEngine on
-
-RewriteCond %{HTTPS} !=on
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-RewriteBase /
 
 # if a directory or a file exists, use it directly
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
 # otherwise forward it to index.php
-#true RewriteRule . index.php
-
-RewriteRule ^(.*)$ /index.php [L,QSA]
+RewriteRule . index.php

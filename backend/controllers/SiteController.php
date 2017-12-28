@@ -173,6 +173,8 @@ class SiteController extends Controller
 
     /**
      * @return string|\yii\web\Response
+     * @throws \Exception
+     * @throws \yii\base\Exception
      */
     public function actionActivation(){
         /* @var $usr User */
