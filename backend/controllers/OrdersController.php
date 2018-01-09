@@ -157,7 +157,7 @@ class OrdersController extends Controller
 			$str .= " успешно создан";
 			$model->status = Orders::STATUS_PLACE;
 			if ($model->save()) {
-				Logs::add('Размещен заказ: ' . $model->order_id . ' на сумму: ' . $amount);
+				//Logs::add('Размещен заказ: ' . $model->order_id . ' на сумму: ' . $amount);
 				$str .= " и размещён";
 				$processed = true; //todo: использовать для определения цвета сообщения
 			} else {
