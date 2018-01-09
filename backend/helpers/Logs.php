@@ -17,7 +17,7 @@ class Logs
     const LOG_DIR = 'logs/log';
 
     public function add($str){
-	    if (php_sapi_name() == 'cli') {
+	    if (false) {
 	    	echo $str . "\r\n";
 		    $userIp = '127.0.0.1';
 		    $userId = 'console';
