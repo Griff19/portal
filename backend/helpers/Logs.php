@@ -28,14 +28,13 @@ class Logs
 		    $userIp = Yii::$app->request->userIP;
 		    $userId = Yii::$app->user->id;
 		    $userName = User::getName($userId);
-		    $fileLog = self::LOG_DIR;
+		    $fileLog = '/var/www/portal/backend/web/logs/log';
 	    }
 
         $date = new DateTime();
         $over = $date->format('Y-m-d H:i:s') . '; '.$userIp.'; ' . $userId . '; ' . $userName . '; ';
-        var_dump($fileLog); die;
-        $w = fopen($fileLog, 'a');//открываем файл для записи в конец
-        fputs($w, $over . $str . "\r\n");//пишем строку в файл
+        $w = fopen($fileLog, 'a'); //открываем файл для записи в конец
+        fputs($w, $over . $str . "\r\n"); //пишем строку в файл
         fclose($w);  //закрываем файл
     }
 }
