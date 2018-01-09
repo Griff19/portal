@@ -25,7 +25,7 @@ class BasketController extends Controller
                 'rules' => [
                     [
                         'actions' => ['index','insert','inserttobasket',
-	                        'delete','deleteall','deleteone',
+	                        'delete','deleteall','deleteone', 'del-last',
 	                        'doinsert','addone', 'insert'],
                         'allow' => true,
                         'roles' => ['@'],                        
@@ -68,6 +68,11 @@ class BasketController extends Controller
 		            .'<a class="btn btn-xs btn-primary" href="javascript:void(0);" onclick="delBasketOne('. $basket->id .')" style="float:right; padding: 1px 7px 1px 7px;" >-</a>'
 			    ."</td>" //количество
 			    .'<td>'. $basket->summ / 100 .'</td>' //сумма
+                .'<td>'
+                    .'<a class="btn btn-xs btn-danger" href="javascript:void(0);" onclick="delBasketString('. $basket->id .')">'
+                        .'<span class="glyphicon glyphicon-trash" style="font-size:12px"></span>'
+                    .'</a>'
+                .'</td>'
 			    ."</tr>";
 	    }
 		$json[] = $html;
@@ -94,6 +99,7 @@ class BasketController extends Controller
      * Отображение строки корзины. (Не используется)
      * @param integer $id идентификатор строки конзмны
      * @return mixed
+     * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
@@ -102,16 +108,18 @@ class BasketController extends Controller
         ]);
     }
 
-	/**
-	 * Добавление товаров в корзину с рабочей страницы оператора /operator
-	 *
-	 * @param integer $customer_id идентификатор контрагента
-	 * @param null|string $good_hash хеш номенклатуры
-	 * @param null|integer $good_id идентификатор номенклатуры
-	 * @param integer $count количество, добавляемое в корзину
-	 *
-	 * @return string
-	 */
+    /**
+     * Добавление товаров в корзину с рабочей страницы оператора /operator
+     *
+     * @param integer $customer_id идентификатор контрагента
+     * @param null|string $good_hash хеш номенклатуры
+     * @param null|integer $good_id идентификатор номенклатуры
+     * @param integer $count количество, добавляемое в корзину
+     *
+     * @return string
+     * @throws \Exception
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionInsert($customer_id, $good_hash = null, $good_id = null, $count)
     {        
 		if ($good_hash)
@@ -230,6 +238,7 @@ class BasketController extends Controller
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
@@ -245,16 +254,24 @@ class BasketController extends Controller
     }
 
     /**
-     * Deletes an existing Basket model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * Удаляем одну строку из корзины
      * @param integer $id
+     * @param null $mod
      * @return mixed
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     * @throws \yii\db\StaleObjectException
      */
-    public function actionDelete($id)
+    public function actionDelete($id, $mod = null)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        /** @var $model Basket */
+        $model = $this->findModel($id);
+        $customer_id = $model->user_id;
+        $model->delete();
+        if ($mod)
+            return self::htmlBasketRows($customer_id);
+        else
+            return $this->redirect(['index']);
     }
 
 	/**
@@ -274,14 +291,17 @@ class BasketController extends Controller
         }
     }
 
-	/**
-	 * Удаляем одну штуку в строке "предварительного заказа"
-	 *
-	 * @param integer $id идентификатор строки корзины
-	 * @param null    $mod режим вызова функции ajax или нет
-	 *
-	 * @return mixed
-	 */
+    /**
+     * Удаляем одну штуку в строке "предварительного заказа"
+     *
+     * @param integer $id идентификатор строки корзины
+     * @param null $mod режим вызова функции ajax или нет
+     *
+     * @return mixed
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionDeleteone($id, $mod = null)
     {
         /** @var Basket $model */
@@ -306,14 +326,30 @@ class BasketController extends Controller
             return $this->redirect(['index']);
     }
 
-	/**
-	 * Добавляем одну штуку товара в строке "предварительного заказа"
-	 *
-	 * @param integer $id илентификатор строки корзины
-	 * @param null    $mod режим вызова функции ajax или нет
-	 *
-	 * @return mixed
-	 */
+    /**
+     * @param $customer_id
+     * @return string
+     * @throws \Exception
+     * @throws \yii\db\StaleObjectException
+     */
+    public function actionDelLast($customer_id)
+    {
+        $model = Basket::find(['user_id' => $customer_id])->orderBy(['id' => SORT_DESC])->one();
+        $model->delete();
+        return self::htmlBasketRows($customer_id);
+    }
+
+    /**
+     * Добавляем одну штуку товара в строке "предварительного заказа"
+     *
+     * @param integer $id илентификатор строки корзины
+     * @param null $mod режим вызова функции ajax или нет
+     *
+     * @return mixed
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionAddone($id, $mod = null)
     {
         $model = $this->findModel($id);

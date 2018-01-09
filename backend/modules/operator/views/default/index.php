@@ -16,6 +16,13 @@ use yii\helpers\Html;
     <?= GridView::widget([
             'dataProvider' => $customerData,
             'filterModel' => $customerSearch,
+            'rowOptions' => function ($model) {
+                /** @var $model Customers */
+                if ($model->orders)
+                    return ['class' => 'success'];
+                else
+                    return null;
+            },
             'columns' => [
                 'customer_id',
                 'customer_1c_id',
@@ -23,7 +30,7 @@ use yii\helpers\Html;
                 'directResponsible',
                 ['attribute' => 'directPhone',
                     'value' => function(Customers $model){
-                        return Html::a("Позвонить", ['order', 'customer_id' => $model->customer_id, 'tp' => $model->typeprices_id], ['class' => 'btn btn-success']);
+                        return Html::a("Заказ", ['order', 'customer_id' => $model->customer_id, 'tp' => $model->typeprices_id], ['class' => 'btn btn-success']);
                     },
                     'format' => 'raw'
                 ],
@@ -31,8 +38,6 @@ use yii\helpers\Html;
     ])?>
 </div>
 
-<?php /** todo: Настроить таблицу контрагентов так, чтобы был активен только первый в списке, а остальные с затемнением.
+<?php /**
  * todo: Наверно надо будет добавить в БД признак текущего контрагента и контрагента в очереди
- * todo: Создать таблицу в БД для хранения привязки контрагентов к конкретному телефонному оператору.
- * todo: Рассмотреть механизм когда оператор не может работать и его контрагенты распределяются на других операторов.
  */ ?>

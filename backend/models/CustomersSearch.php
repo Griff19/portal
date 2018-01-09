@@ -46,9 +46,9 @@ class CustomersSearch extends Customers
     {
         if(Yii::$app->user->can('telephone')){
             $query = Customers::find()->where('phone IS NOT NULL')->andWhere(['customers.status' => Customers::STATUS_ACTIVE])
-				->andWhere("orders.status <> :status OR orders.status IS NULL", [':status' => Orders::STATUS_PLACE])
+				//->andWhere("orders.status <> :status OR orders.status IS NULL", [':status' => Orders::STATUS_PLACE])
 				->orderBy('sort')
-	            ->joinWith('phone')->joinWith('orders');
+	            ->joinWith(['phone', 'orders']);
         } else {
             $query = Customers::find()->where(['user_id'=>Yii::$app->user->id])
 				->andWhere(['customers.status' => Customers::STATUS_ACTIVE]);

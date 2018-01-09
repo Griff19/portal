@@ -6,7 +6,6 @@
 use backend\models\Basket;
 use backend\modules\operator\assets\DefaultAsset;
 use yii\grid\GridView;
-use yii\grid\Column;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
@@ -59,6 +58,7 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
     var oReadyStateTimer;
     var amount = <?= $amount ?>;
     var currentPhone = <?= $customer->directPhone ?> + '';
+
 
     C = {divKeyPadWidth: 220};
 
@@ -532,6 +532,15 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
             $('#summ').html(amount);
         });
     }
+
+    function delBasketString(id) {
+        $.post('/basket/delete?id=' + id + '&mod=1', function (res) {
+            res = JSON.parse(res);
+            amount = res[1];
+            $('#basket > tbody').html(res[0]);
+            $('#summ').html(amount);
+        });
+    }
     // Создаем заказ из набранной "Корзины". Заказ сразу "размещается" и выгружается в ближайшее время.
     function createOrder(customer) {
         if (amount <= <?= $customer->min_amount ?> || typeof(amount) === "undefined") {
@@ -712,7 +721,7 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
 				'good.good_name',
 				'count',
 				[
-					'class' => Column::className(),
+					'class' => 'yii\grid\Column',
 					'header' => 'Повторить',
 					'content' => function ($model) {
 						return Html::a('<span class="glyphicon glyphicon-ok"></span>', '#', [
@@ -744,14 +753,20 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
 								'onclick' => "addBasketOne($model->id)",
 								'style'   => 'float:right;'
 							]) . Html::a('-', 'javascript:void(0);', [
-							        'class'   => 'btn btn-xs btn-primary',
-									'onclick' => "delBasketOne($model->id)",
-									'style'   => 'float:right; padding: 1px 7px 1px 7px;'
+                                'class'   => 'btn btn-xs btn-primary',
+                                'onclick' => "delBasketOne($model->id)",
+                                'style'   => 'float:right; padding: 1px 7px 1px 7px;'
 							]);
 					},
 					'format'    => 'raw'
 				],
-				['attribute' => 'summ', 'value' => function ($model) { return $model->summ / 100; }]
+				['attribute' => 'summ', 'value' => function ($model) { return $model->summ / 100; }],
+                ['class' => 'yii\grid\Column', 'content' => function ($model) {
+		            return Html::a('<span class="glyphicon glyphicon-trash" style="font-size: 12px"></span>', 'javascript:void(0)', [
+                        'class' => 'btn btn-xs btn-danger',
+                        'onclick' => "delBasketString($model->id)",
+                    ]);
+                }],
 			],
 		]) ?>
         <p style="float:right">
@@ -837,7 +852,7 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
 				'good_description',
 				['attribute' => 'good_price', 'value' => function ($model) { return $model->good_price / 100; }],
 				[
-					'class'   => Column::className(),
+					'class'   => 'yii\grid\Column',
 					'header'  => 'Количество',
 					'content' => function ($model) {
 						return Html::input('number', 'count' . $model->good_id, 0, [
@@ -899,7 +914,14 @@ $script = <<<JS
                 if (idx > 0) idx -= 1;
                 else idx = 0;
                 flag = true;
-            } 
+            } else if (e.keyCode === 46) {
+                $.post('/basket/del-last?customer_id=' + customer, function(res){
+                    res = JSON.parse(res);
+                    amount = res[1];
+                    $('#basket > tbody').html(res[0]);
+                    $('#summ').html(amount);        
+                });
+            }
             let elem = $('.chain').eq(idx);
             elem.focus();
             scrollToElement(elem);
