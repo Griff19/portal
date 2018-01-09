@@ -17,18 +17,18 @@ class Logs
     const LOG_DIR = 'logs/log';
 
     public function add($str){
-	    if (false) {
-	    	echo $str . "\r\n";
-		    $userIp = '127.0.0.1';
-		    $userId = 'console';
-		    $userName = 'console';
-		    $fileLog = __DIR__ . '/../../backend/web/' . self::LOG_DIR;
-	    } else {
+//	    if (false) {
+//	    	echo $str . "\r\n";
+//		    $userIp = '127.0.0.1';
+//		    $userId = 'console';
+//		    $userName = 'console';
+//		    $fileLog = __DIR__ . '/../../backend/web/' . self::LOG_DIR;
+//	    } else {
 		    $userIp = Yii::$app->request->userIP;
 		    $userId = Yii::$app->user->id;
 		    $userName = User::getName($userId);
 		    $fileLog = self::LOG_DIR;
-	    }
+	    //}
 
         $date = new DateTime();
         $over = $date->format('Y-m-d H:i:s') . '; '.$userIp.'; ' . $userId . '; ' . $userName . '; ';
