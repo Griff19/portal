@@ -14,15 +14,17 @@ use DateTime;
  */
 class Logs
 {
-    const LOG_DIR = '/logs/log';
+    const LOG_DIR = 'logs/log';
 
     public function add($str){
-	    if (php_sapi_name() == 'cli') {
-	    	echo $str . "\r\n";
-		    $userIp = '127.0.0.1';
-		    $userId = 'console';
-		    $userName = 'console';
-		    $fileLog = __DIR__ . '/../../backend/web' . self::LOG_DIR;
+	    var_dump(Yii::$app->request); die;
+        if (php_sapi_name() == 'cli') {
+            echo $str . "\r\n";
+            $userIp = '127.0.0.1';
+            $userId = 'console';
+            $userName = 'console';
+            $fileLog = __DIR__ . '/../../backend/web/' . self::LOG_DIR;
+        } elseif (Yii::$app->request) {
 	    } else {
 		    $userIp = Yii::$app->request->userIP;
 		    $userId = Yii::$app->user->id;
