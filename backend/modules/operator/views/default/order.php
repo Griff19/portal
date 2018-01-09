@@ -208,7 +208,7 @@ $amount = Basket::getTotals('summ', $customer->customer_id);
                     impu: 'sip:699@192.168.0.18',
                     password: '699',
                     display_name: '699',
-                    websocket_proxy_url: 'wss://192.168.0.18:8089/ws',
+                    websocket_proxy_url: 'https://192.168.0.18:8089/ws',
                     outbound_proxy_url: null,
                     ice_servers: null,
                     enable_rtcweb_breaker: false,
