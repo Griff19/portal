@@ -211,6 +211,7 @@ class OrdersController extends Controller
      * Размещение заказа на исполнение.
      * @param integer $id
      * @return mixed
+     * @throws NotFoundHttpException
      */
     public function actionPlace($id)
     {
@@ -226,6 +227,7 @@ class OrdersController extends Controller
      * Отмена размещенного заказа.
      * @param integer $id
      * @return mixed
+     * @throws NotFoundHttpException
      */
     public function actionUnplace($id)
     {
@@ -244,6 +246,7 @@ class OrdersController extends Controller
      * Поместить заказ в обработанные
      * @param integer $id
      * @return mixed
+     * @throws NotFoundHttpException
      */
     public function actionAgree($id)
     {
@@ -259,6 +262,7 @@ class OrdersController extends Controller
      * убрать из обработанных, только для админов
      * @param integer $id
      * @return mixed
+     * @throws NotFoundHttpException
      */
     public function actionDisagree($id)
     {
@@ -274,6 +278,7 @@ class OrdersController extends Controller
      * Редактируем дынные заказа. После - возвращаемся в окно просмотра заказа
      * @param integer $id
      * @return mixed
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
