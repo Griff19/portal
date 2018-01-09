@@ -146,7 +146,7 @@ class OrdersController extends Controller
         $model->order_date = date('Y-m-d', strtotime("now +1 day"));
         $model->save();
 
-        Logs::add('Создан заказ: ' . $model->order_id . ' на сумму: ' . $amount);
+        //Logs::add('Создан заказ: ' . $model->order_id . ' на сумму: ' . $amount);
 
 	    $str = "Заказ №$model->order_id на сумму {$amount}р.";
 
