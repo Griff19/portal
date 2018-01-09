@@ -28,7 +28,7 @@ class Logs
 		    $userIp = Yii::$app->request->userIP;
 		    $userId = Yii::$app->user->id;
 		    $userName = User::getName($userId);
-		    $fileLog = '/var/www/portal/backend/web/logs/log';
+		    $fileLog = self::LOG_DIR;
 	    }
 
         $date = new DateTime();
