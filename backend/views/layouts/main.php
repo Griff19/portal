@@ -47,7 +47,7 @@ AppAsset::register($this);
                 $menuItems[] = ['label' => 'Авторизация', 'url' => ['/site/login']];
             } else {
                 $menuItems[] = ['label' => 'Заказы', 'url' => ['/orders/index']];
-                $menuItems[] = ['label' => 'Заказ '. Basket::getTotals('summ')/100 .'р.',
+                $menuItems[] = ['label' => 'Заказ '. Basket::getTotals('summ') .'р.',
                                 'url' => ['/basket/index'],
                                 'options' => ['style' => 'font-weight:bolder', 'id' => 'getTotals']
                                 ];

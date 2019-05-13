@@ -69,7 +69,7 @@ class Basket extends ActiveRecord
 	    else
 		    $sum = Basket::find()->where(['user_id' => Yii::$app->user->id])->sum($field);
 
-	    return $sum / 100;
+	    return $field == "summ" ? $sum / 100 : $sum;
     }
 
     //Получаем количество строк в корзине...

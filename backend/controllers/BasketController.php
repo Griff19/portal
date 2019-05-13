@@ -187,7 +187,7 @@ class BasketController extends Controller
                 $model->save();
             }
         }
-        return 'Заказ '. Basket::getTotals('summ')/100 .'р.';
+        return 'Заказ '. Basket::getTotals('summ') .'р.';
     }
 
     /**

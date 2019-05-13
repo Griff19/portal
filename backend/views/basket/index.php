@@ -97,7 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div style="float: right">
        <?php
        //$currDate = date('Y-m-d');
-       $s = Basket::getTotals('summ')/100;
+       $s = Basket::getTotals('summ');
        echo '<strong>Всего товаров: ' . Basket::getTotals('count') . '. На сумму: ' . $s . ' </strong>';
        echo Html::a('Оформить заказ', ['orders/create', 'amount' => $s],['class' => 'btn btn-success', 'name' => 'submit']);
        ?>

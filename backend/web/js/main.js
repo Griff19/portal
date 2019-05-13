@@ -12,6 +12,7 @@ function buttClick(a) {
 
 /**
  * Функция добавления товаров в заказ через ajax и отображение суммы заказа в шапке страницы
+ * Правило 'basketadd' описано в основном конфиге 'config\main.php'
  */
 function changeNumber() {
     $("input[name^='count_']").change(function () {
